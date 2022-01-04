@@ -97,7 +97,7 @@
 
             $sez_settings = get_option( 'sez_site_settings' );
             // $sez_settings = array(
-            //     "site_type" => "",
+            //     "site_type" => "live",
             //     "license" => "khjkjhkhj"
             // );
 
@@ -112,6 +112,7 @@
             
             // Live site.
             } elseif ( isset( $sez_settings[ "site_type" ] ) && $sez_settings[ "site_type" ] === "live" ) {
+                $license_key = isset( $sez_settings[ "license" ] ) ? $sez_settings[ "license" ] : "";
                 require_once SEZ_ABSPATH . "includes/html/html-admin-dashboard-live.php";
             
             // Catch all.
