@@ -15,6 +15,11 @@ jQuery( document ).ready( function( $ ){
                         active: true
                     },
                     {
+                        label: "Rules",
+                        name: "rules",
+                        active: false
+                    },
+                    {
                         label: "Settings",
                         name: "settings",
                         active: false
@@ -45,7 +50,7 @@ jQuery( document ).ready( function( $ ){
                 change_tab: function( i ){
                     this.tabs[0].active = false;
                     this.tabs[1].active = false;
-                    // this.tabs[2].active = false;
+                    this.tabs[2].active = false;
                     this.tabs[ parseInt( i ) ].active = true;
                 },
         

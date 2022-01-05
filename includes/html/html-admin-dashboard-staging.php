@@ -3,18 +3,22 @@
         <?php echo esc_html( get_admin_page_title() ); ?>
     </h1>
 
+    <?php 
+        if ( false == $dump_exists ):
+    ?>
+            <div class="row">
+                <div class="col-6" style="margin: 25px 0 50px 0;padding:25px;border:3px solid red">
+                    <form method="post" action="">
+                        <h5>Additional Action Required:</h5>
+                        <p>We have no reference of your live site (<?= $live_site; ?>) stored on our servers. This must be done before any syncs can be made.</p>
+                        <input type="hidden" name="sez_store_reference" value="y" />
+                        <button type="submit" class="btn btn-success" style="width: 100%;max-width:250px">Store Reference</button>
+                    </form>
+                </div>
+            </div>
+    <?php endif; ?>
+
     <div class="row" style="margin: 25px 0">
-        <!-- <div class="col-4">
-            <p>Last Refresh: December 14, 2021 8:34pm</p>
-            <button type="button" class="btn btn-success" v-on:click="refresh_changes()" style="min-width:250px">
-                <span v-if="refresh_processing">
-                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    Refreshing...
-                </span>
-                <span v-else>Refresh Now</span>
-            </button>
-        </div>
-        <div class="col-1"></div> -->
         <div class="col-4">
             <p>Last Synced: December 8, 2021 10:22am</p>
             <button type="button" class="btn btn-success" v-on:click="sync_changes" style="min-width:250px">

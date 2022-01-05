@@ -64,7 +64,7 @@
                     if ( $_POST[ "sez_site_type" ] === "staging" ){
                         $args[ "ezs_live_site" ] = isset( $_POST[ "sez_live_site" ] ) ? $_POST[ "sez_live_site" ] : "";
                         $args[ "ezs_staging_site" ] = site_url();
-                        $args[ "ezs_staging_site" ] = "https://test.staging.com";
+                        // $args[ "ezs_staging_site" ] = "https://test.staging.com";
                     } else {
                         $args[ "ezs_live_site" ] = site_url();
                     }
@@ -106,8 +106,20 @@
                 require_once SEZ_ABSPATH . "includes/html/html-admin-dashboard-unset.php";
             
             // Staging site.
-            } elseif ( isset( $sez_settings[ "site_type" ] ) && $sez_settings[ "site_type" ] === "staging" ){
-                $license_key = isset( $sez_settings[ "license" ] ) ? $sez_settings[ "license" ] : "";
+            } elseif ( isset( $sez_settings[ "site_type" ] ) && $sez_settings[ "site_type" ] === "staging" && isset( $sez_settings[ "live_site" ] ) ){
+                $license_key = $sez_settings[ "license" ];
+                $live_site = $sez_settings[ "live_site" ];
+
+                // Store reference initiated.
+                if ( isset( $_POST[ "sez_store_reference" ] ) ){
+                    $response = self::store_reference( $license_key, $live_site, site_url() );
+                    if ( is_wp_error( $response ) ){
+                        // Do some kind of indication here.
+                    }
+                }
+
+                // Check if live site dump exists.
+                $dump_exists = self::has_existing_dump( $license_key, $live_site, site_url() );
                 require_once SEZ_ABSPATH . "includes/html/html-admin-dashboard-staging.php";
             
             // Live site.
@@ -147,6 +159,61 @@
                 return wp_send_json_error( $response );
             }
             return wp_send_json_success( $response );
+        }
+
+
+        public static function has_existing_dump( $license_key, $live_domain, $staging_domain ){
+            $url = "https://api.easysyncwp.com/wp-json/easysync/v1/dump?license_key={$license_key}&live_domain={$live_domain}&staging_domain={$staging_domain}";
+            $response = wp_remote_get( $url );
+            $response = new SEZ_Api_Response( $response );
+            $response = $response->extract();
+
+            if ( is_wp_error( $response ) ){
+                return $response;
+            }
+            return $response->exists;
+        }
+
+
+        public static function store_reference( $license_key, $live_domain, $staging_domain ){
+            $live_domain = untrailingslashit( $live_domain );
+            
+            // Create export.
+            $response = wp_remote_post(
+                "{$live_domain}/wp-json/easysync/v1/export",
+                array(
+                    "body" => array(
+                        "license_key" => $license_key
+                    )
+                )
+            );
+            $response = new SEZ_Api_Response( $response );
+            $response = $response->extract();
+
+            if ( is_wp_error( $response ) ){
+                return $response;
+            }
+            $url = $response->url;
+
+            // Create dump.
+            $response = wp_remote_post(
+                "https://api.easysyncwp.com/wp-json/easysync/v1/dump",
+                array(
+                    "body" => array(
+                        "license_key" => $license_key,
+                        "url" => $url,
+                        "live_domain" => $live_domain,
+                        "staging_domain" => $staging_domain
+                    )
+                )
+            );
+            $response = new SEZ_Api_Response( $response );
+            $response = $response->extract();
+
+            if ( is_wp_error( $response ) ){
+                return $response;
+            }
+            return $response->uploaded;
         }
     }
 
