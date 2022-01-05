@@ -56,7 +56,6 @@
                 $headers = implode( "\t", $headers );
                 
                 // Write headers to file.
-                //file_put_contents( "{$path}/{$table}.txt", $headers . "\n" );
                 $wp_filesystem->put_contents( "{$path}/{$table}.txt", $headers . "\n" );
 
                 $results = $wpdb->get_results( "SELECT * FROM {$table}", ARRAY_A );
@@ -64,12 +63,16 @@
                     foreach ( $results as $result ){
                         $values = array();
                         foreach ( $result as $field => $value ){
+                            // Get rid of new lines that throw off computing.
+                            $value = str_replace( "\n", '\n', $value );
+                            $value = str_replace( "\r", '\r', $value );
                             $values[] = $value;
                         }
                         file_put_contents( "{$path}/{$table}.txt", implode( "\t", $values ) . "\n", FILE_APPEND );
                     }
                 }
             }
+            return true;
         }
     }
 

@@ -146,13 +146,14 @@
             }
 
             $live_site = isset( $sez_settings[ "live_site" ] ) ? $sez_settings[ "live_site" ] : "blank";
+
             if ( false == self::has_existing_dump( $license_key, $live_site, site_url() ) ){
                 return wp_send_json_error( new WP_Error( "sync_changes_error", "There is no reference to the live site." ) );
             }
 
             // Create export of live site.
             $url = self::get_live_site_export( $live_site, $license_key );
-            // $url = sez_export_db_to_zip();
+
             if ( is_wp_error( $url ) ){
                 return wp_send_json_error( $url );
             }

@@ -11,8 +11,12 @@
 class Test_SEZ_Functions extends WP_UnitTestCase {
 
     function test_export_db(){
-        $results = sez_export_db( ABSPATH );
-        var_dump( $results );
+        global $wpdb;
+
+        $dir = trailingslashit( ABSPATH ) . "test-export"; 
+        $comment_id = $this->factory->comment->create( array( "comment_content" => "This is my test comment.\n\nAnd here is another line." ) );
+        
+        $results = sez_export_db( $dir );
         $this->assertTrue( $results );
     }
 
