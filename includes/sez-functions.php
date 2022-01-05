@@ -164,7 +164,7 @@
             if ( is_wp_error( $result ) ){
                 return $result;
             }
-            return trailingslashit( $tmp_dir ) . $unique . "/dump.zip";
+            return trailingslashit( SEZ_TMP_URL ) . $unique . "/dump.zip";
         }
     }
 
