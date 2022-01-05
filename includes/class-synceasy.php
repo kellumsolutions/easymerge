@@ -32,6 +32,7 @@
             include_once SEZ_ABSPATH . '/includes/class-sez-admin-page.php';
             include_once SEZ_ABSPATH . '/includes/class-sez-api-response.php';
             include_once SEZ_ABSPATH . '/includes/class-sez-api-controller.php';
+            include_once SEZ_ABSPATH . '/includes/class-sez-map.php';
         }
 
         function init_hooks(){

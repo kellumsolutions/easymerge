@@ -42,30 +42,14 @@
                 return rest_ensure_response( $err );
             } 
 
-            $tmp_dir = sez_prepare_dir( SEZ_TMP_DIR );
+            $url = sez_export_db_to_zip();
 
-            if ( is_wp_error( $tmp_dir ) ){
-                return rest_ensure_response( $tmp_dir );
-            }
-
-            $unique = bin2hex( random_bytes( 12 ) );
-            $to_dir = untrailingslashit( $tmp_dir ) . "/" . $unique;
-            $to_dir = sez_prepare_dir( $to_dir );
-
-            // Export database to text files.
-            $result = sez_export_db( $to_dir );
-            if ( is_wp_error( $result ) ){
-                return rest_ensure_response( $result );
-            }
-
-            // Compress.
-            $result = sez_create_zip( "dump.zip", $to_dir, $to_dir );
-            if ( is_wp_error( $result ) ){
-                return rest_ensure_response( $result );
+            if ( is_wp_error( $url ) ){
+                return rest_ensure_response( $url );
             }
 
             // Send url to zip in api call.
-            return rest_ensure_response( array( "url" => trailingslashit( SEZ_TMP_URL ) . $unique . "/dump.zip" ) );
+            return rest_ensure_response( array( "url" => $url ) );
         }
     }
 

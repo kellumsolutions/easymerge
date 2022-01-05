@@ -140,4 +140,32 @@
         }
     }
 
+
+    if ( !function_exists( 'sez_export_db_to_zip' ) ){
+        function sez_export_db_to_zip(){
+            $tmp_dir = sez_prepare_dir( SEZ_TMP_DIR );
+
+            if ( is_wp_error( $tmp_dir ) ){
+                return $tmp_dir;
+            }
+
+            $unique = bin2hex( random_bytes( 12 ) );
+            $to_dir = untrailingslashit( $tmp_dir ) . "/" . $unique;
+            $to_dir = sez_prepare_dir( $to_dir );
+
+            // Export database to text files.
+            $result = sez_export_db( $to_dir );
+            if ( is_wp_error( $result ) ){
+                return $result;
+            }
+
+            // Compress.
+            $result = sez_create_zip( "dump.zip", $to_dir, $to_dir );
+            if ( is_wp_error( $result ) ){
+                return $result;
+            }
+            return trailingslashit( $tmp_dir ) . $unique . "/dump.zip";
+        }
+    }
+
 ?>

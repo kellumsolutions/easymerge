@@ -138,6 +138,44 @@
             // Ensure this is the staging site.
             // Get url of export zip from live site.
             // Send url, license to api and recieve changes.
+            $sez_settings = get_option( 'sez_site_settings' );
+            $license_key = isset( $sez_settings[ "license" ] ) ? $sez_settings[ "license" ] : "";
+
+            if ( !isset( $sez_settings[ "site_type" ] ) || $sez_settings[ "site_type" ] !== "staging" ){
+                return wp_send_json_error( new WP_Error( "sync_changes_error", "Syncs can only be performed from a staging site." ) );
+            }
+
+            $live_site = isset( $sez_settings[ "live_site" ] ) ? $sez_settings[ "live_site" ] : "blank";
+            if ( false == self::has_existing_dump( $license_key, $live_site, site_url() ) ){
+                return wp_send_json_error( new WP_Error( "sync_changes_error", "There is no reference to the live site." ) );
+            }
+
+            // Create export of live site.
+            $url = self::get_live_site_export( $live_site, $license_key );
+            // $url = sez_export_db_to_zip();
+            if ( is_wp_error( $url ) ){
+                return wp_send_json_error( $url );
+            }
+
+            $response = wp_remote_post(
+                "https://api.easysyncwp.com/wp-json/easysync/v1/changes",
+                array(
+                    "body" => array(
+                        "url" => $url,
+                        "license_key" => $license_key,
+                        "staging_domain" => site_url(),
+                        "live_domain" => $live_site
+                    )
+                )
+            );
+
+            $response = new SEZ_Api_Response( $response );
+            $response = $response->extract();
+            
+            if ( is_wp_error( $response ) ){
+                return wp_send_json_error( $response );
+            }
+            return wp_send_json_success( array( "changes" => array() ) );
         }
 
 
@@ -176,24 +214,10 @@
 
 
         public static function store_reference( $license_key, $live_domain, $staging_domain ){
-            $live_domain = untrailingslashit( $live_domain );
-            
-            // Create export.
-            $response = wp_remote_post(
-                "{$live_domain}/wp-json/easysync/v1/export",
-                array(
-                    "body" => array(
-                        "license_key" => $license_key
-                    )
-                )
-            );
-            $response = new SEZ_Api_Response( $response );
-            $response = $response->extract();
-
-            if ( is_wp_error( $response ) ){
-                return $response;
+            $url = self::get_live_site_export( $live_domain, $license_key );
+            if ( is_wp_error( $url ) ){
+                return $url;
             }
-            $url = $response->url;
 
             // Create dump.
             $response = wp_remote_post(
@@ -214,6 +238,26 @@
                 return $response;
             }
             return $response->uploaded;
+        }
+
+
+        public static function get_live_site_export( $live_domain, $license_key ){
+            $response = wp_remote_post(
+                "{$live_domain}/wp-json/easysync/v1/export",
+                array(
+                    "body" => array(
+                        "license_key" => $license_key,
+                    )
+                )
+            );
+
+            $response = new SEZ_Api_Response( $response );
+            $response = $response->extract();
+            
+            if ( is_wp_error( $response ) ){
+                return ( $response );
+            }
+            return $response->url;
         }
     }
 
