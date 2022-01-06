@@ -23,6 +23,7 @@
     }
 
 
+    // TODO: - Remove table prefix from table names. Security purposes.
     if ( !function_exists( 'sez_describe_db' ) ){
         function sez_describe_db(){
             global $wpdb;

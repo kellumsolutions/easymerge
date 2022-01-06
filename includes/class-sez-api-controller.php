@@ -63,14 +63,14 @@
             return rest_ensure_response( array( "url" => $url ) );
         }
 
-
+    
         public static function describe_db(){
-            if ( !isset( $_POST[ "license_key" ] ) ){
+            if ( !isset( $_GET[ "license_key" ] ) ){
                 $err = new WP_Error( "describe_db_error", "License key is required." );
                 return rest_ensure_response( $err );
             }
 
-            $license_key = $_POST[ "license_key" ];
+            $license_key = $_GET[ "license_key" ];
 
             // Validate license key.
             $sez_settings = get_option( 'sez_site_settings' );
