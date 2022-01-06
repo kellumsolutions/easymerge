@@ -23,6 +23,40 @@
     }
 
 
+    if ( !function_exists( 'sez_describe_db' ) ){
+        function sez_describe_db(){
+            global $wpdb;
+
+            if ( is_wp_error( $tables = sez_get_tables() ) ){
+                return $tables;
+            }
+
+            $output = array();
+
+            foreach ( $tables as $table ){
+                $result = $wpdb->get_results( "SHOW KEYS FROM {$table} WHERE Key_name = 'PRIMARY'" );
+
+                if ( $result && count( $result ) > 0 ){
+                    $key = $result[0]->Column_name;
+                    $columns = $wpdb->get_col( "DESC {$table}", 0 );
+                    $index = array_search( $key, $columns );
+                    if ( false === $index ){
+                        return new WP_Error( "describe_db_error", "Failed to get index of primary key for table {$table}." );
+                    }
+                    $output[ $table ] = array(
+                        "pk_index" => $index,
+                        "field_count" => count( $columns )
+                    );
+                    
+                } else {
+                    return new WP_Error( "describe_db_error", "Failed to get primary key for table {$table}." );
+                }
+            }
+            return $output;
+        }
+    }
+
+
     if ( !function_exists( 'sez_export_db' ) ){
         function sez_export_db( $to_dir ){
             global $wpdb, $wp_filesystem;
@@ -66,6 +100,7 @@
                             // Get rid of new lines that throw off computing.
                             $value = str_replace( "\n", '\n', $value );
                             $value = str_replace( "\r", '\r', $value );
+                            $value = str_replace( "\t", '\t', $value );
                             $values[] = $value;
                         }
                         file_put_contents( "{$path}/{$table}.txt", implode( "\t", $values ) . "\n", FILE_APPEND );

@@ -48,6 +48,15 @@ class Test_SEZ_Functions extends WP_UnitTestCase {
     }
 
 
+    function test_describe_db(){
+        global $wpdb;
+
+        $result = sez_describe_db();
+        $this->assertTrue( 0 === (int)$result[ $wpdb->users ][ "pk_index" ] );
+        $this->assertTrue( 10 === (int)$result[ $wpdb->users ][ "field_count" ] );
+    }
+
+
     function ezsa_rmdir( $dir ){
         if (is_dir( $dir ) ) { 
             $objects = scandir($dir);
