@@ -32,7 +32,10 @@
                 return $tables;
             }
 
-            $output = array();
+            $output = array(
+                "prefix" => $wpdb->prefix,
+                "tables" => array()
+            );
 
             foreach ( $tables as $table ){
                 $result = $wpdb->get_results( "SHOW KEYS FROM {$table} WHERE Key_name = 'PRIMARY'" );
@@ -44,7 +47,7 @@
                     if ( false === $index ){
                         return new WP_Error( "describe_db_error", "Failed to get index of primary key for table {$table}." );
                     }
-                    $output[ $table ] = array(
+                    $output[ "tables" ][ $table ] = array(
                         "pk_index" => $index,
                         "field_count" => count( $columns )
                     );
@@ -204,6 +207,43 @@
                 return $result;
             }
             return trailingslashit( SEZ_TMP_URL ) . $unique . "/dump.zip";
+        }
+    }
+
+
+    if ( !function_exists( 'sez_get_primary_keys' ) ){
+        function sez_get_primary_keys(){
+            global $wpdb;
+            
+            $keys = array();
+            $tables = $wpdb->get_results( "SHOW TABLES" );
+            
+            foreach( $tables as $table_data ){
+                foreach( $table_data as $key => $table_name ){
+                    $result = $wpdb->get_results( "SHOW KEYS FROM {$table_name} WHERE Key_name = 'PRIMARY'" );
+
+                    if ( $result && count( $result ) > 0 ){
+                        $keys[ $table_name ] = $result[0]->Column_name;
+                    
+                    } else {
+                        return new WP_Error( "get_primary_keys_error", "Unable to get primary key for table {$table}." );
+                    }
+                }
+            }
+            return $keys;
+        }
+    }
+
+
+
+    if ( !function_exists( 'sez_get_table_primary_key' ) ){
+        function sez_get_table_primary_key( $table ){
+            $keys = sez_get_primary_keys();
+            if ( is_wp_error( $keys ) ){
+                return $keys;
+            } 
+
+            return isset( $keys[ $table ] ) ? $keys[ $table ] : new WP_Error( "get_table_primary_key_error", "Unable to get primary key for table {$table}." );
         }
     }
 
