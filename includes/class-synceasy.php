@@ -43,25 +43,12 @@
         }
 
         function init_hooks(){
-            // register_activation_hook( EZD_PLUGIN_FILE, array( 'EZD_Install', 'install' ) );
+            register_activation_hook( SEZ_PLUGIN_FILE, array( 'SEZ_Install', 'install' ) );
+
+            add_action( "sez_after_change_execute", "sez_save_mapping", 20, 5 );
+            add_filter( "sez_before_change_execute", "sez_adjust_primary_key", 10, 4 );
         }
 
-
-        // protected function setup_logger(){
-        //     if ( !is_writeable( EZD_LOG_FILE ) ){ return; }
-
-        //     $output = "%datetime% [%level_name%] [PID:%extra.process_id%] %channel%: %message% %context%\n";
-        //     $formatter = new Monolog\Formatter\LineFormatter( $output );
-
-        //     $streamHandler = new Monolog\Handler\StreamHandler( EZD_LOG_FILE, Monolog\Logger::DEBUG );
-        //     $streamHandler->setFormatter( $formatter );
-
-        //     $logger = new Monolog\Logger( 'main' );
-        //     $logger->pushHandler( $streamHandler );
-        //     $logger->pushProcessor( new \Monolog\Processor\ProcessIdProcessor() );
-
-        //     $this->logger = $logger;
-        // }
 
         /**
          * What type of request is this?

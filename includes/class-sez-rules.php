@@ -2,9 +2,79 @@
 
     class SEZ_Rules {
 
+        private static $option = "sez_rules_props";
+
+
+        public static function init(){
+            add_action( 'init', array( __CLASS__, 'maybe_enable_default_rules' ) );
+        }
+
+
+        public static function maybe_enable_default_rules(){
+            $rule_options = get_option( self::$option );
+            
+            // Only enable default rules if the property doesn't exist at all.
+            // If the property exists but no rules are enabled, the user did this.
+            if ( false === $rule_options ){
+                // Inital save so property exists.
+                self::save_rule_options( array() );
+
+                $result = self::enable_rules(
+                    array(
+                        "include_all_comments",
+                        "include_all_users",
+                        "include_all_usermeta"
+                    )
+                );
+                if ( is_wp_error( $result ) ){
+                    // Do something here?
+                    // Maybe show notice on output screen.
+                }
+            }
+        }
+
+
+        public static function enable_rules( $rule_ids = array() ){
+            $rule_opts = get_option( self::$option );
+
+            // Should never occur. Sanity check.
+            if ( false === $rule_opts ){
+                return new WP_Error( "enable_rules_error", "Unable to retrieve saved rules." );
+            }
+
+            $enabled_rules = isset( $rule_opts[ "enabled" ] ) ? $rule_opts[ "enabled" ] : array();
+            $enabled_rules = array_merge( $enabled_rules, $rule_ids );
+            $rule_opts[ "enabled" ] = $enabled_rules;
+            return self::save_rule_options( $rule_opts );
+        }
+
+
+        public static function disable_rules( $rule_ids = array() ){
+
+        }
+
+
+        public static function save_rule_options( $rule_opts ){
+            update_option( self::$option, $rule_opts );
+            return true;
+        }
+
+
         public static function get_rules(){
             $rules = self::get_default_rules();
             $rules = apply_filters( 'sez_additional_rules', $rules );
+
+            $rule_opts = get_option( self::$option );
+            $enabled_rule_map = array();
+            
+            // Create hash table.
+            foreach ( $rule_opts[ "enabled" ] as $enabled_rule_id ){
+                $enabled_rule_map[ $enabled_rule_id ] = "1";
+            }
+
+            foreach ( $rules as &$rule ){
+                $rule[ "enabled" ] = isset( $enabled_rule_map[ $rule[ "id" ] ] );
+            }
             return $rules;
         }
 
@@ -16,6 +86,9 @@
             $tables = array();
 
             foreach ( $rules as $rule ){
+                // Skip disabled rules.
+                if ( false === $rule[ "enabled" ] ){ continue; }
+                
                 $table = $rule[ "table" ];
                 if ( empty( $allow_prefix ) ){
                     $table = substr( $table, strlen( $wpdb->prefix ) );
@@ -34,6 +107,9 @@
             $rules = self::get_rules();
 
             foreach( $rules as $rule ){
+                // Skip disabled rules.
+                if ( false === $rule[ "enabled" ] ){ continue; }
+
                 $table = $rule[ "table" ];
                 $policy = $rule[ "policy" ];
 
@@ -108,12 +184,15 @@
         }
 
 
+        // Only include rules for comments and users.
+        // By default, user's can't upload items.
         private static function get_default_rules(){
             global $wpdb;
             
             return array(
                 array(
                     "id" => "include_all_comments",
+                    "description" => "Allows all comments.",
                     "table" => $wpdb->comments,
                     "policy" => "include",
                     "priority" => 20,
@@ -121,6 +200,7 @@
                 ),
                 array(
                     "id" => "include_all_users",
+                    "description" => "Allows all users.",
                     "table" => $wpdb->users,
                     "policy" => "include",
                     "priority" => 20,
@@ -128,6 +208,7 @@
                 ),
                 array(
                     "id" => "include_all_usermeta",
+                    "description" => "Allows all user metadata. This should be enabled whenever 'include_all_users' is enabled.",
                     "table" => $wpdb->usermeta,
                     "policy" => "include",
                     "priority" => 20,
@@ -168,5 +249,7 @@
             );
         }
     }
+
+    SEZ_Rules::init();
 
 ?>

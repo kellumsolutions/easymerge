@@ -260,4 +260,56 @@
         }
     }
 
+
+    if ( !function_exists( 'sez_get_primary_key_index' ) ){
+        function sez_get_primary_key_index( $table ){
+            if ( is_wp_error( $key = sez_get_table_primary_key( $table ) ) ){ 
+                return $key; 
+            }
+
+            if ( is_wp_error( $fields = sez_get_table_columns( $table ) ) ){
+                return $fields;
+            }
+
+            $index = array_search( $key, $fields );
+
+            if ( is_null( $index ) || false === $index ){
+                return new WP_Error( "get_primary_key_index_error", "Unable to get the primary key index for table {$table}." );
+            }
+            return $index;
+        }
+    }
+
+
+    if ( !function_exists( 'sez_save_mapping' ) ){
+        function sez_save_mapping( $table, $operation, $initial_primary_key, $actual_primary_key, $primary_key_field ){
+            if ( $operation === "CREATE" ){
+                if ( $initial_primary_key != $actual_primary_key ){
+                    SEZ_Map::insert( $table, $primary_key_field, $initial_primary_key, $actual_primary_key );
+                }
+            }
+        }
+    }
+
+
+    if ( !function_exists( "sez_adjust_primary_key" ) ){
+        function sez_adjust_primary_key( $data, $table, $primary_key_index, $operation ){
+            if ( $operation === "CREATE" ){
+                return $data;
+            }
+            
+            $initial_primary_key = $data[ $primary_key_index ];
+
+            if ( is_wp_error( $primary_key_field = sez_get_table_primary_key( $table ) ) ){
+                return $primary_key_field;
+            }
+
+            // If there is no mapping for the primary key, 
+            // the initial primary key will be returned.
+            $new_primary_key = SEZ_Map::get_value( $table, $primary_key_field, $initial_primary_key, $initial_primary_key );
+            $data[ $primary_key_index ] = $new_primary_key;
+            return $data;
+        }
+    }
+
 ?>

@@ -6,13 +6,13 @@
 
         public static function retrieve(){
             $map = get_option( self::$option_name );
-            return $map ? $map : false;
+            return false === $map ? array() : $map;
         }
 
         public static function get_value( $table, $primary_field, $value, $default = false ){
             $map = self::retrieve();
 
-            if ( $map ){
+            if ( !empty( $map ) ){
                 if ( isset( $map[ $table ][ $primary_field ][ $value ] ) ){
                     return $map[ $table ][ $primary_field ][ $value ];
                 }
@@ -23,11 +23,6 @@
 
         public static function insert( $table, $primary_field, $previous_value, $new_value ){
             $map = self::retrieve();
-
-            //  Create map if it does not exist.
-            if ( $map === false ){
-                $map = array();
-            }
 
             $map[ $table ][ $primary_field ][ $previous_value ] = $new_value;
             return self::save( $map );

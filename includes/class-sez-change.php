@@ -19,6 +19,8 @@
             $this->data = $data;
 
             $tables = sez_get_tables();
+
+            // Add back table prefix if needed.
             if ( !in_array( $table, $tables ) ){
                 $this->table = $wpdb->prefix . $table;
             }
@@ -94,30 +96,23 @@
          * @return mixed - Returns the inserted row on success. If inserted row can't be fetched,
          *      returns true. If operation fails, returns false.
          */
-        public function perform_create( $primary_key_field, $data ){
+        public function perform_create( $primary_key_index, $fields ){
             global $wpdb;
 
-            //  Remove previous primary key so new one can be set.
-            unset( $data[ $primary_key_field ] );
+            $create_data = array();
 
-            $rows_inserted = $wpdb->insert( $this->table, $data );
-            if ( !$rows_inserted ){ return false; }
-
-            $id = $wpdb->insert_id;
-
-            if ( $id || $id === 0 ){
-                $query = "SELECT * FROM {$this->table} WHERE {$primary_key_field} = '{$id}'";
-                $results = $wpdb->get_results( $query, ARRAY_A );
-                
-                if ( $results ){
-                    return $results[0];
-                }
+            // Create insert data.
+            foreach( $fields as $index => $field ){
+                if ( $index === $primary_key_index ){ continue; }
+                $create_data[ $field ] = $this->data[ $index ];
             }
 
-            //  Row was created successfully but we couldn't get the insert_id.
-            //  Table might not have auto incrementing primary key.
-            //  Or there was an error fetching the inserted row.
-            return true;
+            $rows_inserted = $wpdb->insert( $this->table, $create_data );
+            if ( !$rows_inserted ){
+                return new WP_Error( "perform_create_error", "Error creating new record." );
+            }
+
+            return $wpdb->insert_id;
         }
 
         /**
@@ -130,25 +125,30 @@
          * @return mixed - Returns the updated row on success. If updated row can't be fetched,
          *      returns true. If operation fails, returns false.
          */
-        public function perform_update( $primary_key, $primary_key_field, $data ){
+        public function perform_update( $primary_key_index, $fields ){
             global $wpdb;
 
-            unset( $data[ $primary_key_field ] );
-            $where = array( $primary_key_field => $primary_key );
+            $primary_key_field = $fields[ $primary_key_index ];
+            $where = array( $primary_key_field => $this->primary_key );
             
-            $rows_updated = $wpdb->update( $this->table, $data, $where );
+            $insert_data = array();
 
-            //  Either the operation failed or the existing data is identical to 
-            //  the data to be inserted.
-            if ( !$rows_updated ){ return false; }
-
-            $query = "SELECT * FROM {$this->table} WHERE {$primary_key_field} = '{$primary_key}'";
-            $results = $wpdb->get_results( $query, ARRAY_A );
-            
-            if ( $results ){
-                return $results[0];
+            // Create insert data.
+            foreach( $fields as $index => $field ){
+                if ( $index === $primary_key_index ){ continue; }
+                $insert_data[ $field ] = $this->data[ $index ];
             }
-            return true;
+
+            $rows_updated = $wpdb->update( $this->table, $insert_data, $where );
+
+            if ( false === $rows_updated ){
+                return new WP_Error( "perform_update_error", "Error performing update from change. Table: {$this->table}, PK: {$this->primary_key}." );
+            
+            } elseif ( 0 === $rows_updated ){
+                // No error, but no rows were updated. Shouldn't happen.
+                // Maybe show a warning here.
+            }
+            return $this->primary_key;
         }
 
         /**
@@ -159,18 +159,23 @@
          * 
          * @return bool - True/false based on success of operation.
          */
-        public function perform_delete( $primary_key, $primary_key_field ){
+        public function perform_delete( $primary_key_index, $fields ){
             global $wpdb;
             
-            $where = array( $primary_key_field => $primary_key );
+            $primary_key_field = $fields[ $primary_key_index ];
+            $where = array( $primary_key_field => $this->primary_key );
 
             $rows_deleted = $wpdb->delete( $this->table, $where );
-            return $rows_deleted ? true : false;
+
+            if ( false === $rows_deleted ){
+                return new WP_Error( "perform_delete_error", "Error deleting record from db. Table: {$this->table}, PK: {$this->primary_key}." );
+            }
+            return $this->primary_key;
         }
 
         
         /**
-         * Execute change.
+         * Execute change. Where the magic happens.
          * 
          * @param obj $data - Object containing fields/values for diff row for this change.
          *      @key string - Name of db field, @value string - DB value for preceding field.
@@ -183,21 +188,34 @@
         public function execute( $data = array(), $fields = null, $primary_key_index = null ){
             global $wpdb;
 
+            if ( is_null( $fields ) ){
+                if ( is_wp_error( $fields = sez_get_table_columns( $this->table ) ) ){
+                    return $fields;
+                }
+            }
 
-            $fields = is_null( $fields ) ? ezd_get_table_fields( $this->table ) : $fields;
-            $primary_key_index = is_null( $primary_key_index ) ? ezd_get_table_primary_key_index( $this->table ) : $primary_key_index;
+            if ( count( $fields ) !== count( $this->data ) ){
+                return new WP_Error( "execute_changes_error", "Mismatch between data schema and table schema for table {$this->table}." );
+            }
+
+            if ( is_null( $primary_key_index ) ){
+                if ( is_wp_error( $primary_key_index = sez_get_primary_key_index( $this->table ) ) ){
+                    return $primary_key_index;
+                }
+            }
             
-            if ( count( $fields ) <= $primary_key_index ){ return false; }
-
-            $primary_key_field = $fields[ $primary_key_index ];
-            $primary_key = $this->primary_key( $primary_key_index );
-            $data = array_merge( $this->get_line_data( $fields, $primary_key_index ), $data );
-
-            if ( !isset( $data[ $primary_key_field ] ) ){ return false; }
+            // Fields and primary key don't match up.
+            // Should never happen.
+            if ( count( $fields ) <= $primary_key_index ){
+                return new WP_Error( "execute_changes_error", "Primary key does not exist." );
+            }
 
             /**
              * Allows changes to be made to a query before its executed.
              * This is where users can keep references synced that aren't foreign keys.
+             * 
+             * This is where the primary keys are adjusted when they differ from the 
+             * live site and staging site. Only matters on update and delete operations.
              * 
              * Only works for changes that are going to be added to the database.
              * Doesn't work for existing database entries.
@@ -206,25 +224,40 @@
              *      that product ID is referenced in an option's value, the user can change
              *      17 to 20 in the option's serialized value. 
              * 
-             * @hooked ezd_insert_dev_primary_key - 10
+             * @hooked sez_adjust_primary_key - 10
              *      
              */
-            $data = apply_filters( "ezd_before_change_execute", $data, $this->table, $primary_key_field, $primary_key );
+            $data = array();
+            foreach ( $fields as $index => $field ){
+                $data[] = $this->data[ $index ];
+            }
+
+            $data = apply_filters( "sez_before_change_execute", $data, $this->table, $primary_key_index, $this->operation );
+            
+            // Validate returned data.
+            if ( count( $fields ) !== count( $data ) ){
+                return new WP_Error( "execute_changes_error", "Mismatch between data schema and table schema for table {$this->table} after filter." );
+            }
+            $this->data = $data;
+            $this->primary_key = $data[ $primary_key_index ]; // Set new primary key (if data has changed).
+
 
             // Execute query.
             $result = false;
 
             if ( $this->operation === "CREATE" ){
-                $result = $this->perform_create( $primary_key_field, $data );
+                $result = $this->perform_create( $primary_key_index, $fields );
 
             } elseif ( $this->operation === "UPDATE" ){
-                $result = $this->perform_update( $primary_key, $primary_key_field, $data );
+                $result = $this->perform_update( $primary_key_index, $fields );
 
             } elseif ( $this->operation === "DELETE" ){
-                $result = $this->perform_delete( $primary_key, $primary_key_field );
+                $result = $this->perform_delete( $primary_key_index, $fields );
             }
 
-            if ( !$result ){ return false; }
+            if ( is_wp_error( $result ) ){
+                return $result;
+            }
 
             /**
              * Allows values to be added to the live/dev site map.
@@ -235,10 +268,10 @@
              *      postmeta table changing all post_id (foreign key) values from 17 to 20 for 
              *      pending queries.
              * 
-             * @hooked ezd_save_mapping_after_query_execution - 20
+             * @hooked sez_save_mapping - 20
              * 
              */
-            do_action( "ezd_after_change_execute", $this->table, $this->operation, $data, $result );
+            do_action( "sez_after_change_execute", $this->table, $this->operation, $this->primary_key, $result, $fields[ $primary_key_index ] );
 
             return true;
         }
