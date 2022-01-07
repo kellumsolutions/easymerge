@@ -247,4 +247,17 @@
         }
     }
 
+
+    if ( !function_exists( 'sez_get_table_columns' ) ){
+        function sez_get_table_columns( $table ){
+            global $wpdb;
+
+            $headers = $wpdb->get_col( "DESC {$table}", 0 );
+            if ( !$headers || empty( $headers ) ){
+                return new WP_Error( "get_table_columns_error", "Unable to get columns for table {$table}." );
+            }
+            return $headers;
+        }
+    }
+
 ?>

@@ -33,6 +33,13 @@
             include_once SEZ_ABSPATH . '/includes/class-sez-api-response.php';
             include_once SEZ_ABSPATH . '/includes/class-sez-api-controller.php';
             include_once SEZ_ABSPATH . '/includes/class-sez-map.php';
+            include_once SEZ_ABSPATH . '/includes/class-sez-rules.php';
+            include_once SEZ_ABSPATH . '/includes/class-sez-change.php';
+
+            include_once SEZ_ABSPATH . '/includes/expressions/class-sez-rule-expression.php';
+            include_once SEZ_ABSPATH . '/includes/expressions/class-sez-rule-equality-expression.php';
+            include_once SEZ_ABSPATH . '/includes/expressions/class-sez-rule-inequality-expression.php';
+            include_once SEZ_ABSPATH . '/includes/expressions/class-sez-rule-like-expression.php';
         }
 
         function init_hooks(){

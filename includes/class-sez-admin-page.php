@@ -138,6 +138,9 @@
             // Ensure this is the staging site.
             // Get url of export zip from live site.
             // Send url, license to api and recieve changes.
+
+            // TODO: -  Send tables and primary keys that have rules. 
+            //          That way we can limit the amount of changes brought through.
             $sez_settings = get_option( 'sez_site_settings' );
             $license_key = isset( $sez_settings[ "license" ] ) ? $sez_settings[ "license" ] : "";
 
@@ -151,13 +154,20 @@
                 return wp_send_json_error( new WP_Error( "sync_changes_error", "There is no reference to the live site." ) );
             }
 
+
+            // Get live site data.
+            $desc = self::desc_live_site( $live_site, $license_key );
+            if ( is_wp_error( $desc ) ){
+                return wp_send_json_error( $desc );
+            }
+
             // Create export of live site.
             $url = self::get_live_site_export( $live_site, $license_key );
 
             if ( is_wp_error( $url ) ){
                 return wp_send_json_error( $url );
             }
-
+            //return wp_send_json_success( SEZ_Rules::get_tables_with_rules() );
             $response = wp_remote_post(
                 "https://api.easysyncwp.com/wp-json/easysync/v1/changes",
                 array(
@@ -165,18 +175,30 @@
                         "url" => $url,
                         "license_key" => $license_key,
                         "staging_domain" => site_url(),
-                        "live_domain" => $live_site
+                        "live_domain" => $live_site,
+                        "desc" => $desc,
+                        "tables" => SEZ_Rules::get_tables_with_rules()
                     )
                 )
             );
 
             $response = new SEZ_Api_Response( $response );
-            $response = $response->extract();
+            $changes = $response->extract();
             
-            if ( is_wp_error( $response ) ){
-                return wp_send_json_error( $response );
+            if ( is_wp_error( $changes ) ){
+                return wp_send_json_error( $changes );
             }
-            return wp_send_json_success( array( "changes" => array() ) );
+            return wp_send_json_success( array( "changes" => $changes ) );
+
+            // Loop through all the changes.
+            // Make SEZ_Change objects.
+            // If a rule exists, perform change.
+
+            // Test perform change.
+            // Setup database insert on successful and failed changes.
+            // Figure out label for changes for the front-end. Make property on SEZ_Change.
+            // Maybe setup a background process for all of this?
+            // Setup front end to read from a log file?
         }
 
 
@@ -259,6 +281,20 @@
                 return ( $response );
             }
             return $response->url;
+        }
+
+
+        public static function desc_live_site( $live_site, $license_key ){
+            $live_site = untrailingslashit( $live_site );
+            $url = "{$live_site}/wp-json/easysync/v1/describe_db?license_key={$license_key}";
+            $response = wp_remote_get( $url );
+            $response = new SEZ_Api_Response( $response );
+            $response = $response->extract();
+            return $response;
+            // if ( is_wp_error( $response ) ){
+            //     return $response;
+            // }
+            // return $response
         }
     }
 

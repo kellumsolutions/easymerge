@@ -13,6 +13,7 @@
             if ( $raw_response[ "response" ][ "code" ] < 200 || $raw_response[ "response" ][ "code" ] > 299 ){
                 $code = "rest_api_error";
                 $message = "An error occurred. Please try again later.";
+                //file_put_contents( SEZ_ABSPATH . "/test.txt", $raw_response[ "body" ]  );
                 if ( isset( $raw_response[ "body" ] ) ){
                     $body = json_decode( $raw_response[ "body" ], ARRAY_A );
                     if ( isset( $body[ "message" ] ) && !empty( $body[ "message" ] ) ){
