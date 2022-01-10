@@ -28,13 +28,18 @@
         function includes(){
             include_once SEZ_ABSPATH . '/vendor/autoload.php';
 
+            include_once SEZ_ABSPATH . '/includes/class-sez-install.php';
             include_once SEZ_ABSPATH . '/includes/sez-functions.php';
             include_once SEZ_ABSPATH . '/includes/class-sez-admin-page.php';
             include_once SEZ_ABSPATH . '/includes/class-sez-api-response.php';
+            include_once SEZ_ABSPATH . '/includes/class-sez-remote-api.php';
             include_once SEZ_ABSPATH . '/includes/class-sez-api-controller.php';
             include_once SEZ_ABSPATH . '/includes/class-sez-map.php';
             include_once SEZ_ABSPATH . '/includes/class-sez-rules.php';
             include_once SEZ_ABSPATH . '/includes/class-sez-change.php';
+
+            include_once SEZ_ABSPATH . '/includes/class-sez-sync.php';
+            include_once SEZ_ABSPATH . '/includes/class-sez-sync-functions.php';
 
             include_once SEZ_ABSPATH . '/includes/expressions/class-sez-rule-expression.php';
             include_once SEZ_ABSPATH . '/includes/expressions/class-sez-rule-equality-expression.php';
@@ -47,6 +52,13 @@
 
             add_action( "sez_after_change_execute", "sez_save_mapping", 20, 5 );
             add_filter( "sez_before_change_execute", "sez_adjust_primary_key", 10, 4 );
+
+            add_action( "init", array( $this, "on_init" ) );
+        }
+
+
+        function on_init(){
+            $this->sync = new SEZ_Sync();
         }
 
 

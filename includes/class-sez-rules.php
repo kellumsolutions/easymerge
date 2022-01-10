@@ -49,8 +49,18 @@
         }
 
 
+        // TODO: -  Really inefficient. Find a way to optimize this.
         public static function disable_rules( $rule_ids = array() ){
+            $rule_opts = get_option( self::$option );
 
+            // Should never occur. Sanity check.
+            if ( false === $rule_opts ){
+                return new WP_Error( "enable_rules_error", "Unable to retrieve saved rules." );
+            }
+            $enabled_rules = isset( $rule_opts[ "enabled" ] ) ? $rule_opts[ "enabled" ] : array();
+            $enabled_rules = array_diff( $enabled_rules, $rule_ids );
+            $rule_opts[ "enabled" ] = $enabled_rules;
+            return self::save_rule_options( $rule_opts );
         }
 
 

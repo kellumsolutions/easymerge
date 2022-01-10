@@ -27,7 +27,14 @@ jQuery( document ).ready( function( $ ){
                 ],
                 // refresh_processing: false,
                 sync: {
+                    show_console: false,
                     processing: false,
+                    tracking: false,
+                    interval: false,
+                    job_id: "",
+                    output: [ "sync starting..." ],
+                    error: "",
+                    additional_output: ""
                 },
                 settings: {
                     live_site: "",
@@ -70,6 +77,9 @@ jQuery( document ).ready( function( $ ){
                             console.log( response, status );
                             if ( status == "success" ){
                                 if ( response.success ){
+                                    self.sync.job_id = response.data;
+                                    self.sync.tracking = true;
+                                    self.sync.interval = window.setInterval( self.track_sync_changes, 1000 );
                                 }
                             }
                         }
@@ -80,6 +90,63 @@ jQuery( document ).ready( function( $ ){
                     })
                     .always( function(){
                         self.sync.processing = false;
+                    });
+                },
+
+                start_sync: function(){
+                    this.sync.show_console = true;
+                    this.sync_changes();
+                },
+
+                track_sync_changes: function(){
+                    var self = this;
+                    if ( !self.sync.tracking ){
+                        window.clearInterval( self.sync.interval );
+                        return;
+                    }
+                    
+                    var data = {
+                        "action": "sez_sync_get_status",
+                        "sez_job_id": self.sync.job_id
+                    };
+            
+                    jQuery.post(
+                        ajaxurl,
+                        data,
+                        function( response, status ){
+                            console.log( response, status );
+                            if ( status == "success" ){
+                                if ( response.success ){
+                                    self.sync.output = response.data.output;
+                                    if ( response.data.status == "complete" ){
+                                        self.sync.tracking = false;
+                                        self.sync.additional_output = "<h3>Sync is done.</h3><p>Congratulations! Your sync is complete. The console output can also be found in the sync logs.</p>";    
+                                    }
+                                    return;
+                                }
+                            }
+                            self.sync.tracking = false;
+                            var message = "An error occurred. Please try again later.";
+                            if ( 
+                                status == "success" && 
+                                "data" in response && 
+                                Array.isArray( response.data ) && 
+                                response.data.length > 0 && 
+                                "message" in response.data[0] 
+                            ){
+                                message = response.data[0].message;
+                            }
+                            self.sync.error = message;
+                        }
+                    )
+                    .fail( function( jqXHR, textStatus, errorThrown ){
+                        console.log( jqXHR, textStatus, errorThrown );
+                        console.log( "oops we got an error" );
+                        self.sync.tracking = false;
+                        self.sync.error = "An unknown error occurred. Please try again later.";
+                    })
+                    .always( function(){
+                        
                     });
                 }
             },

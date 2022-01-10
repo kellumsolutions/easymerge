@@ -6,6 +6,7 @@
             add_action( 'admin_menu', array( __CLASS__, 'setup_admin_page' ) );
             add_action( 'admin_enqueue_scripts', array( __CLASS__, 'load_scripts' ) );
             add_action( 'wp_ajax_sez_sync_changes', array( __CLASS__, 'sync_changes' ) );
+            add_action( 'wp_ajax_sez_sync_get_status', array( __CLASS__, 'get_sync_status' ) );
             add_action( 'wp_ajax_sez_get_license_key', array( __CLASS__, 'get_license_key' ) );
         }
 
@@ -33,10 +34,7 @@
 
                     wp_enqueue_script( 'sez-admin-page-scripts', SEZ_ASSETS_URL . "js/sez-admin-page.js", array( 'jquery', 'sez-vue' ), false, true );
                     
-                    $localize_obj = array(
-                        // "wave_authenticated" => json_encode( sf_wave_session_open() ),
-                        // "wave_auth_url" => SF_Wave_Client::auth_request_url()
-                    );
+                    $localize_obj = array();
                     wp_localize_script( 'sez-admin-page-scripts', 'SEZ_VARS', $localize_obj );
                 }
             }
@@ -44,13 +42,9 @@
 
 
         public static function output(){
-            // $result = request_filesystem_credentials( admin_url() . "tools.php?page=synceasy", "", false, SEZ_ABSPATH );
-            // var_dump( $result );
-            // return;
-
             $sez_error = "";
 
-            // Register site.
+            // Request to register site.
             if ( isset( $_POST[ "sez_site_type" ] ) && isset( $_POST[ "sez_license_key" ] ) ){
                 // Send to API.
                 if ( empty( $_POST[ "sez_site_type" ] ) || !in_array( strtolower( $_POST[ "sez_site_type" ] ), array( "live", "staging" ) ) ){
@@ -64,21 +58,12 @@
                     if ( $_POST[ "sez_site_type" ] === "staging" ){
                         $args[ "ezs_live_site" ] = isset( $_POST[ "sez_live_site" ] ) ? $_POST[ "sez_live_site" ] : "";
                         $args[ "ezs_staging_site" ] = site_url();
-                        // $args[ "ezs_staging_site" ] = "https://test.staging.com";
+                        
                     } else {
                         $args[ "ezs_live_site" ] = site_url();
                     }
 
-                    $response = wp_remote_post(
-                        "https://api.easysyncwp.com/wp-json/easysync/v1/register",
-                        array(
-                            "body" => $args
-                        )
-                    );
-        
-                    $response = new SEZ_Api_Response( $response );
-                    $response = $response->extract();
-                    
+                    $response = SEZ_Remote_Api::create_new_registration( $args );                    
                     if ( is_wp_error( $response ) ){
                         $sez_error = $response->get_error_message();
 
@@ -93,12 +78,29 @@
                         update_option( 'sez_site_settings', $sez_settings );
                     }
                 }
+            
+            // Request to change which rules are enabled.
+            } elseif ( isset( $_POST[ "sez-edit-rules" ] ) ){
+                $rules_to_enable = array();
+                $rules_to_disable = array();
+                $rules = SEZ_Rules::get_rules();
+                foreach( $rules as $index => $rule ){
+                    $id = $rule[ "id" ];
+                    if ( isset( $_POST[ $id ] ) ){
+                        $rules_to_enable[] = $id;
+                    } else {
+                        $rules_to_disable[] = $id;
+                    }
+                }
+                SEZ_Rules::enable_rules( $rules_to_enable );
+                SEZ_Rules::disable_rules( $rules_to_disable );
             }
 
             $sez_settings = get_option( 'sez_site_settings' );
             // $sez_settings = array(
-            //     "site_type" => "live",
-            //     "license" => "khjkjhkhj"
+            //     "site_type" => "staging",
+            //     "license" => "khjkjhkhj",
+            //     "live_site" => "gogreen.com"
             // );
 
             // License not set.
@@ -110,16 +112,21 @@
                 $license_key = $sez_settings[ "license" ];
                 $live_site = $sez_settings[ "live_site" ];
 
-                // Store reference initiated.
+                // Request to store reference to live site.
                 if ( isset( $_POST[ "sez_store_reference" ] ) ){
                     $response = self::store_reference( $license_key, $live_site, site_url() );
                     if ( is_wp_error( $response ) ){
                         // Do some kind of indication here.
+                        $sez_error = "Error occurred storing reference to site {$live_site}. ERROR: " . $response->get_error_message();
                     }
                 }
 
                 // Check if live site dump exists.
-                $dump_exists = self::has_existing_dump( $license_key, $live_site, site_url() );
+                $dump_exists = SEZ_Remote_Api::get_dump( $license_key, $live_site, site_url() );
+                if ( is_wp_error( $dump_exists ) ){
+                    // Do some kind of indication?
+                    $dump_exists = false;
+                }
                 require_once SEZ_ABSPATH . "includes/html/html-admin-dashboard-staging.php";
             
             // Live site.
@@ -135,86 +142,57 @@
 
 
         public static function sync_changes(){
-            // Ensure this is the staging site.
-            // Get url of export zip from live site.
-            // Send url, license to api and recieve changes.
-
-            // TODO: -  Send tables and primary keys that have rules. 
-            //          That way we can limit the amount of changes brought through.
-            $sez_settings = get_option( 'sez_site_settings' );
-            $license_key = isset( $sez_settings[ "license" ] ) ? $sez_settings[ "license" ] : "";
-
-            if ( !isset( $sez_settings[ "site_type" ] ) || $sez_settings[ "site_type" ] !== "staging" ){
-                return wp_send_json_error( new WP_Error( "sync_changes_error", "Syncs can only be performed from a staging site." ) );
+            $job_id = SEZ()->sync->start();
+            if ( is_wp_error( $job_id ) ) {
+                return wp_send_json_error( $job_id );
             }
-
-            $live_site = isset( $sez_settings[ "live_site" ] ) ? $sez_settings[ "live_site" ] : "blank";
-
-            if ( false == self::has_existing_dump( $license_key, $live_site, site_url() ) ){
-                return wp_send_json_error( new WP_Error( "sync_changes_error", "There is no reference to the live site." ) );
-            }
-
-
-            // Get live site data.
-            $desc = self::desc_live_site( $live_site, $license_key );
-            if ( is_wp_error( $desc ) ){
-                return wp_send_json_error( $desc );
-            }
-
-            // Create export of live site.
-            $url = self::get_live_site_export( $live_site, $license_key );
-
-            if ( is_wp_error( $url ) ){
-                return wp_send_json_error( $url );
-            }
-            //return wp_send_json_success( SEZ_Rules::get_tables_with_rules() );
-            $response = wp_remote_post(
-                "https://api.easysyncwp.com/wp-json/easysync/v1/changes",
-                array(
-                    "body" => array(
-                        "url" => $url,
-                        "license_key" => $license_key,
-                        "staging_domain" => site_url(),
-                        "live_domain" => $live_site,
-                        "desc" => $desc,
-                        "tables" => SEZ_Rules::get_tables_with_rules()
-                    )
-                )
-            );
-
-            $response = new SEZ_Api_Response( $response );
-            $changes = $response->extract();
-            
-            if ( is_wp_error( $changes ) ){
-                return wp_send_json_error( $changes );
-            }
-            return wp_send_json_success( array( "changes" => $changes ) );
-
-            // Loop through all the changes.
-            // Make SEZ_Change objects.
-            // If a rule exists, perform change.
+            return wp_send_json_success( $job_id );
 
             // Test perform change.
             // Setup database insert on successful and failed changes.
             // Figure out label for changes for the front-end. Make property on SEZ_Change.
-            // Maybe setup a background process for all of this?
-            // Setup front end to read from a log file?
+        }
+
+
+        public static function get_sync_status(){
+            if ( !isset( $_POST[ "sez_job_id" ] ) ){
+                return wp_send_json_error( new WP_Error( "get_sync_status_error", "Job id not provided." ) );
+            }
+            $job_id = $_POST[ "sez_job_id" ];
+            $log = SEZ()->sync->get_log_path( $job_id );
+
+            if ( !file_exists( $log ) ){
+                return wp_send_json_error( new WP_Error( "get_sync_status_error", "Log file {$log} does not exist." ) );
+            }
+
+            $output = array();
+
+            $handle = fopen( $log, "r" );
+            if ( $handle ) {
+                while ( ( $line = fgets( $handle ) ) !== false) {
+                    $output[] = $line;
+                }
+                fclose($handle);
+
+            } else {
+                // error opening the file.
+                return wp_send_json_error( new WP_Error( "get_sync_status_error", "Error reading log file {$log}." ) );
+            }
+
+            $job_still_exists = SEZ()->sync->get_job_param( $job_id, "log", "" );
+
+            // Assume the process is done.
+            $status = $job_still_exists ? "ongoing" : "complete";
+
+            return wp_send_json_success( array( "output" => $output, "status" => $status ) );
         }
 
 
         public static function get_license_key(){
-            $response = wp_remote_post(
-                "https://api.easysyncwp.com/wp-json/easysync/v1/license",
-                array(
-                    "body" => array(
-                        "name" => isset( $_POST[ "ezs_name" ] ) ? $_POST[ "ezs_name" ] : "",
-                        "email" => isset( $_POST[ "ezs_email" ] ) ? $_POST[ "ezs_email" ] : ""
-                    )
-                )
-            );
+            $name = isset( $_POST[ "ezs_name" ] ) ? $_POST[ "ezs_name" ] : "";
+            $email = isset( $_POST[ "ezs_email" ] ) ? $_POST[ "ezs_email" ] : "";
 
-            $response = new SEZ_Api_Response( $response );
-            $response = $response->extract();
+            $response = SEZ_Remote_Api::create_license_key( $name, $email );
             
             if ( is_wp_error( $response ) ){
                 return wp_send_json_error( $response );
@@ -223,37 +201,13 @@
         }
 
 
-        public static function has_existing_dump( $license_key, $live_domain, $staging_domain ){
-            $url = "https://api.easysyncwp.com/wp-json/easysync/v1/dump?license_key={$license_key}&live_domain={$live_domain}&staging_domain={$staging_domain}";
-            $response = wp_remote_get( $url );
-            $response = new SEZ_Api_Response( $response );
-            $response = $response->extract();
-
-            if ( is_wp_error( $response ) ){
-                return $response;
-            }
-            return $response->exists;
-        }
-
-
-        public static function store_reference( $license_key, $live_domain, $staging_domain ){
-            $url = self::get_live_site_export( $live_domain, $license_key );
+        private static function store_reference( $license_key, $live_domain, $staging_domain ){
+            $url = SEZ_Sync_Functions::export_site_db( $live_domain, $license_key );
             if ( is_wp_error( $url ) ){
                 return $url;
             }
 
-            // Create dump.
-            $response = wp_remote_post(
-                "https://api.easysyncwp.com/wp-json/easysync/v1/dump",
-                array(
-                    "body" => array(
-                        "license_key" => $license_key,
-                        "url" => $url,
-                        "live_domain" => $live_domain,
-                        "staging_domain" => $staging_domain
-                    )
-                )
-            );
+            $response = SEZ_Remote_Api::create_dump( $license_key, $live_domain, $staging_domain, $url );
             $response = new SEZ_Api_Response( $response );
             $response = $response->extract();
 
@@ -261,40 +215,6 @@
                 return $response;
             }
             return $response->uploaded;
-        }
-
-
-        public static function get_live_site_export( $live_domain, $license_key ){
-            $response = wp_remote_post(
-                "{$live_domain}/wp-json/easysync/v1/export",
-                array(
-                    "body" => array(
-                        "license_key" => $license_key,
-                    )
-                )
-            );
-
-            $response = new SEZ_Api_Response( $response );
-            $response = $response->extract();
-            
-            if ( is_wp_error( $response ) ){
-                return ( $response );
-            }
-            return $response->url;
-        }
-
-
-        public static function desc_live_site( $live_site, $license_key ){
-            $live_site = untrailingslashit( $live_site );
-            $url = "{$live_site}/wp-json/easysync/v1/describe_db?license_key={$license_key}";
-            $response = wp_remote_get( $url );
-            $response = new SEZ_Api_Response( $response );
-            $response = $response->extract();
-            return $response;
-            // if ( is_wp_error( $response ) ){
-            //     return $response;
-            // }
-            // return $response
         }
     }
 

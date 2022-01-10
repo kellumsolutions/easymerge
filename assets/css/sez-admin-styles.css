@@ -1,3 +1,66 @@
 body {
     background: #f0f0f1;
 }
+#sez_sync_modal {
+    position: fixed;
+    display: none;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+    background: rgba( 255,255,255,0.8);
+    z-index: 99999;
+}
+#sez_sync_modal.active {
+    display: block;
+}
+.sez-topbar {
+    background: #4d4d4d;
+    padding: 3px 5px;
+    border-radius: 10px 10px 0 0;
+    position: relative;
+}
+.sez-bubble {
+    border-radius: 50%;
+    height: 12px;
+    width: 12px;
+    background: #FF5F57;
+    margin: 0 3px;
+    display: inline-block;
+}
+.sez-bubble:nth-of-type(2){
+    background: #FFB600;
+}
+.sez-bubble:nth-of-type(3){
+    background: #28C840;
+}
+.sez-console-title {
+    color: #ffffff;
+    text-align: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding-top: 4px;
+    font-weight: bold;
+}
+#sez-blackbox {
+    background: #1a1a1a;
+    border-radius: 0 0 10px 10px;
+    height: 500px
+}
+#sez-blackbox > .sez-blackbox-content {
+    padding: 20px;
+    overflow-y: scroll;
+    height: 100%;
+}
+#sez-blackbox > .sez-blackbox-content p {
+    color: #ffffff;
+    margin: 3px 0;
+}
+.sez-hidden {
+    display: none;
+}
+.sez-active {
+    display: block;
+}

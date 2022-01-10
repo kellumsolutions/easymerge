@@ -3,6 +3,16 @@
         <?php echo esc_html( get_admin_page_title() ); ?>
     </h1>
 
+
+    <?php if ( !empty( $sez_error ) ): ?>
+        <div class="row" style="margin-top:20px">
+            <div class="col">
+                <p style='color:red;font-weight:bold'><?= $sez_error; ?></p>
+            </div>
+        </div>
+    <?php endif; ?>
+
+
     <?php 
         if ( false == $dump_exists ):
     ?>
@@ -21,12 +31,13 @@
     <div class="row" style="margin: 25px 0">
         <div class="col-4">
             <p>Last Synced: December 8, 2021 10:22am</p>
-            <button type="button" class="btn btn-success" v-on:click="sync_changes" style="min-width:250px">
-                <span v-if="sync.processing">
+            <button type="button" class="btn btn-success" v-on:click="start_sync" style="min-width:250px">
+                Sync Changes
+                <!-- <span v-if="sync.processing">
                     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                     Syncing...
                 </span>
-                <span v-else>Sync Changes</span>
+                <span v-else>Sync Changes</span> -->
             </button>
         </div>
     </div>
@@ -38,8 +49,35 @@
             </li>
         </ul>
         <div style="background:#ffffff;border: 1px solid #dee2e6;padding:20px">
-            <div v-if="selected_tab == 'pending_changes'">
-                <p>pending changes...</p>
+            <div v-if="selected_tab == 'rules'">
+                <form method="post" action="">
+                    <table class="table">
+                        <tr>
+                            <th>Rule</th>
+                            <th>Enabled</th>
+                        </tr>
+                        <tbody>
+                            <?php
+                                $rules = SEZ_Rules::get_rules();
+                                foreach ( $rules as $rule ):
+                            ?>
+                                    <tr>
+                                        <td>
+                                            <label for="<?= $rule[ 'id' ]; ?>">
+                                                <p style="margin: 0"><?= $rule[ "id" ]; ?></p>
+                                                <p class="text-secondary"><?= $rule[ "description" ]; ?></p>
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <input type="checkbox" name="<?= $rule[ 'id' ]; ?>" id="<?= $rule[ 'id' ]; ?>" <?= $rule[ "enabled" ] ? "checked" : ""; ?> />
+                                        </td>
+                                    </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                    <input type="hidden" name="sez-edit-rules" value="y" />
+                    <button type="submit" class="btn btn-success" style="width: 100%;max-width:250px;margin-top:20px">Save Rules</button>
+                </form>
             </div>
             <div v-else-if="selected_tab == 'synced_changes'">
                 <p>synced changes...</p>
@@ -64,7 +102,35 @@
                             </td>
                         </tr>
                     </table>
-                    <button class="btn btn-success" type="button">Save Settings</button>
+                    <!-- <button class="btn btn-success" type="button">Save Settings</button> -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sync modal -->
+    <div id="sez_sync_modal" :class="{active: sync.show_console}" style="padding-top:100px">
+        <div class="container" style="max-width:1000px">
+            <div class="row">
+                <div class="col-9">
+                    <div class="sez-topbar">
+                        <span class="sez-bubble"></span>
+                        <span class="sez-bubble"></span>
+                        <span class="sez-bubble"></span>
+                        <p class="sez-console-title">SyncEasy Console</p>
+                    </div>
+                    <div id="sez-blackbox">
+                        <div class="sez-blackbox-content">
+                            <p v-for="line in sync.output">{{ line }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div v-html="sync.additional_output"></div>
+                    <div :class="{ 'sez-active': sync.error, 'sez-hidden': !sync.error }">
+                        <h3 style="color:red"><b>Error</b></h3>
+                        <h5 style="color:red">{{ sync.error }}</h5>
+                    </div>
                 </div>
             </div>
         </div>
