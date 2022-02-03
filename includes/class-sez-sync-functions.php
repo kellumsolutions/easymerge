@@ -5,6 +5,8 @@
 
         public static function start( $job_id, $log ){
             SEZ_Sync::log( $log, "Starting sync." );
+            SEZ_Sync::log( $log, "Job ID: {$job_id}." );
+            SEZ_Sync::log( $log, "A complete log of this sync can be found at {$log}." );
         }
 
 
@@ -39,16 +41,13 @@
             $live_domain = SEZ()->sync->get_job_param( $job_id, "live_site" );
             $staging_domain = SEZ()->sync->get_job_param( $job_id, "staging_site" );
 
-            $url = "https://api.easysyncwp.com/wp-json/easysync/v1/dump?license_key={$license_key}&live_domain={$live_domain}&staging_domain={$staging_domain}";
-            $response = wp_remote_get( $url );
-            $response = new SEZ_Api_Response( $response );
-            $response = $response->extract();
-
+            $response = SEZ_Remote_Api::get_dump( $license_key, $live_domain, $staging_domain, $log );
+            
             if ( is_wp_error( $response ) ){
                 return $response;
             }
-            $exists = $response->exists;
-            if ( false == $exists ){
+           
+            if ( false == $response ){
                 return new WP_Error( "sync_error", "Dump reference does not exist for site {$live_domain}." );
                 
             } else {
@@ -82,29 +81,19 @@
             $license_key = SEZ()->sync->get_job_param( $job_id, "license_key" );
             $live_domain = SEZ()->sync->get_job_param( $job_id, "live_site" );
 
-            $response = wp_remote_post(
-                "{$live_domain}/wp-json/easysync/v1/export",
-                array(
-                    "body" => array(
-                        "license_key" => $license_key,
-                    )
-                )
-            );
-
-            $response = new SEZ_Api_Response( $response );
-            $response = $response->extract();
+            $response = self::export_site_db( $live_domain, $license_key, $log );
             
             if ( is_wp_error( $response ) ){
                 return ( $response );
             }
 
-            SEZ_Sync::log( $log, "Successfully exported live site ({$live_domain}) database." );
-            return array( "live_site_export_url" => $response->url );
+            SEZ_Sync::log( $log, "Successfully exported live site ({$live_domain}) database. Export Url: {$response}" );
+            return array( "live_site_export_url" => $response );
         }
 
 
         // TODO: -  When fetching changes, somehow limit the size of the data returned.
-        //          Implement paging.
+        //          Maybe implement paging.
         public static function fetch_changes( $job_id, $log ){
             $url = SEZ()->sync->get_job_param( $job_id, "live_site_export_url" );
             $license_key = SEZ()->sync->get_job_param( $job_id, "license_key" );
@@ -115,22 +104,16 @@
 
             SEZ_Sync::log( $log, "Rules exist for " . count( $tables_with_rules ) . " tables on your staging site. " . join( ", ", array_keys( $tables_with_rules ) ) );
 
-            $response = wp_remote_post(
-                "https://api.easysyncwp.com/wp-json/easysync/v1/changes",
+            $_changes = SEZ_Remote_Api::get_changes(
                 array(
-                    "body" => array(
-                        "url" => $url,
-                        "license_key" => $license_key,
-                        "staging_domain" => $staging_domain,
-                        "live_domain" => $live_domain,
-                        "desc" => $desc,
-                        "tables" => $tables_with_rules
-                    )
+                    "url" => $url,
+                    "license_key" => $license_key,
+                    "staging_domain" => $staging_domain,
+                    "live_domain" => $live_domain,
+                    "desc" => $desc,
+                    "tables" => $tables_with_rules
                 )
             );
-
-            $response = new SEZ_Api_Response( $response );
-            $_changes = $response->extract();
             
             if ( is_wp_error( $_changes ) ){
                 return $_changes;
@@ -200,7 +183,7 @@
 
 
         public static function replace_existing_dump( $job_id, $log ){
-            $url = SEZ()->sync->get_job_param( $job_id, "changes_file" );
+            $file = SEZ()->sync->get_job_param( $job_id, "changes_file" );
 
             // Ensure file exists.
             if ( !file_exists( $file ) ){
@@ -212,60 +195,154 @@
                 return new WP_Error( "sez_sync_error", "No data read from changes file {$file}." );
             }
 
+            $url = SEZ()->sync->get_job_param( $job_id, "live_site_export_url" );
+            $license_key = SEZ()->sync->get_job_param( $job_id, "license_key" );
+            $staging_domain = SEZ()->sync->get_job_param( $job_id, "staging_site" );
+            $live_domain = SEZ()->sync->get_job_param( $job_id, "live_site" );
 
+            SEZ_Sync::log( $log, "Changes file is valid. Proceeding to update reference to live site {$live_domain}." );
+
+            $response = SEZ_Remote_Api::create_dump( $license_key, $live_domain, $staging_domain, $url, $log );
+
+            if ( is_wp_error( $response ) ){
+                return $response;
+            }
+            
+            if ( false == $response ){
+                return new WP_Error( "sez_sync_error", "Unable to update the state of the live site ({$live_domain})." );
+            }
+            SEZ_Sync::log( $log, "Successfully updated reference to live site {$live_domain}." );
         }
 
 
-        public static function perform_changes( $job_id, $log ){
+        public static function save_changes_to_db( $job_id, $log ){
+            // Read changes from file.
+            // Repetitive.
             $file = SEZ()->sync->get_job_param( $job_id, "changes_file" );
+            SEZ_Sync::log( $log, "Loading changes from file {$file} to store in database." );
 
+            // Ensure file exists.
             if ( !file_exists( $file ) ){
                 return new WP_Error( "sez_sync_error", "Changes file {$file} does not exist." );
             }
 
-            $raw_changes = file_get_contents( $file );
-            if ( false === $raw_changes ){
-                return new WP_Error( "sez_sync_error", "Unable to get contents of file {$file}. Potential permissions issue." );
+            // Ensure there is actual data.
+            if ( 0 === (int)filesize( $file ) ){
+                return new WP_Error( "sez_sync_error", "No data read from changes file {$file}." );
             }
 
-            if ( 0 === (int)$raw_changes ){
-                return new WP_Error( "sez_sync_error", "No data read from changes file {$file}." );        
-            }
-            $changes = array();
-            $_changes = json_decode( $raw_changes, true );
-            foreach ( $_changes as $index => $_change ){
-                $operation = $_change->operation;
-                $table = $_change->table;
-                $primary_key = $_change->primary_key;
-                $data = $_change->data;
-                $change = new SEZ_Change( $operation, $table, $primary_key, $data );
+            $changes = json_decode( file_get_contents( $file ), true );
+            $total_changes = count( $changes );
 
-                $rule = $change->find_rule();
-                if ( $rule ){
-                    //$change->execute();
+            // Loop and write to db.
+            $successful_saves = 0;
+            foreach ( $changes as $change ){
+                $_change = new SEZ_Change(
+                    $change[ "operation" ],
+                    $change[ "table" ],
+                    $change[ "primary_key" ],
+                    $change[ "data" ]
+                );
+                if ( false === $_change->save( $job_id ) ){
+                    SEZ_Sync::log( $log, "Error saving change to database. Continuing. Details: table - {$_change->table}, primary key - {$_change->primary_key}", "WARNING" );
+                } else {
+                    $successful_saves++;
                 }
             }
+            SEZ_Sync::log( $log, "{$successful_saves}/{$total_changes} changes were saved successfully to the database." );
+            SEZ_Sync::log( $log, "Changes that were not saved successfully to the database can be tried again after the sync." );
+        }
+
+
+        public static function perform_changes( $job_id, $log ){
+            global $wpdb;
+
+            // Read changes from db.
+            $sql = "SELECT * FROM {$wpdb->prefix}sez_changes WHERE job_id = %s";
+            $results = $wpdb->get_results(
+                $wpdb->prepare( $sql, $job_id),
+                ARRAY_A
+            );
+
+            if ( empty( $results ) ){
+                return new WP_Error( "sez_sync_error", "Unable to get job changes for job ID {$job_id} from database." );
+            }
+
+            $changes = array();
+            $unprocessed_changes = 0;
+
+            // Loop thru and perform change.
+            foreach( $results as $index => $result ){
+                $change = SEZ_Change::db_init( $result );
+
+                if ( is_wp_error( $change ) ){
+                    $id = $result[ "ID" ];
+                    SEZ_Sync::log( $log, "Unable to process database change for execution. ID: {$id}.", "WARNING" );
+                    $unprocessed_changes++;
+                } else {
+                    $changes[] = $change;
+                }
+            }
+
+            if ( $unprocessed_changes > 0 ){
+                return new WP_Error( "sez_sync_error", "{$unprocessed_changes} database changes were unable to be processed. Please try again later." );
+            }
+
+            SEZ_Sync::log( $log, count( $changes ) . " changes to process." );
+            $unexecuted_changes = 0;
+
+            foreach ( $changes as $index => $change ){
+                if ( is_wp_error( $result = $change->execute() ) ){
+                    SEZ_Sync::log( $log, "Change " . ( $index + 1 ) . "/" . count( $changes ) . ": Unable to execute change.", "WARNING" );
+                    $unexecuted_changes++;
+                } else {
+                    SEZ_Sync::log( $log, "Change " . ( $index + 1 ) . "/" . count( $changes ) . ": Executed successfully." );
+                }
+            }
+
+            if ( $unexecuted_changes > 0 ){
+                SEZ_Sync::log( $log, "{$unexecuted_changes} changes were unable to be executed. Please reference this log and try again later.", "WARNING" );
+            } else {
+                SEZ_Sync::log( $log, "All changes were executed successfully." );
+            }
+            return true;
         }
 
 
         public static function done( $job_id, $log ){
-            SEZ_Sync::log( $log, "Done" );
+            SEZ_Sync::log( $log, "Done." );
         }
 
 
+        /**
+         * Helpers
+         */
+        public static function export_site_db( $live_domain, $license_key, $log = false ){
+            $endpoint = "{$live_domain}/wp-json/easysync/v1/export";
+            $body = array(
+                "license_key" => $license_key,
+            );
 
-        public static function export_site_db( $live_domain, $license_key ){
             $response = wp_remote_post(
-                "{$live_domain}/wp-json/easysync/v1/export",
+                $endpoint,
                 array(
-                    "body" => array(
-                        "license_key" => $license_key,
-                    )
+                    "body" => $body
                 )
             );
 
+            $json = json_encode( $body );
+
+            if ( !empty( $log ) ){
+                SEZ_Sync::log( $log, "SEZ_Sync_Functions::export_site_db -- endpoint: {$endpoint}, body: {$json}", "DEBUG" );
+            }
             $response = new SEZ_Api_Response( $response );
             $response = $response->extract();
+            
+            $json = json_encode( $response );
+
+            if ( !empty( $log ) ){
+                SEZ_Sync::log( $log, "SEZ_Sync_Functions::export_site_db -- response: {$json}", "DEBUG" );
+            }
             
             if ( is_wp_error( $response ) ){
                 return $response;

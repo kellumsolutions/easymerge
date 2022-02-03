@@ -33,7 +33,7 @@
             }
 
             return array(
-                "CREATE TABLE {$wpdb->prefix}ezsa_changes (
+                "CREATE TABLE {$wpdb->prefix}sez_changes (
                 ID BIGINT(20) NOT NULL AUTO_INCREMENT,
                 operation VARCHAR(20) NOT NULL DEFAULT '',
                 `table` VARCHAR(100) NOT NULL DEFAULT '',

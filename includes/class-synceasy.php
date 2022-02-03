@@ -23,6 +23,17 @@
             $this->define( 'SEZ_ASSETS_URL', SEZ_PLUGIN_URL . '/assets/' );
             $this->define( 'SEZ_TMP_DIR', SEZ_ABSPATH . 'tmp/' );
             $this->define( 'SEZ_TMP_URL', SEZ_PLUGIN_URL . '/tmp/' );
+            $this->define( 'SEZ_LOG_LEVEL', 'DEBUG' );
+            $this->define( 
+                'SEZ_LOG_LEVELS', 
+                array(
+                    'ERROR' => 1,
+                    'WARNING' => 2,
+                    'INFO' => 3,
+                    'DEBUG' => 4,
+                    'TRACE' => 5
+                )
+            );
         }
 
         function includes(){

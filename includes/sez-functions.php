@@ -332,4 +332,65 @@
         }
     }
 
+
+    if ( !function_exists( 'sez_get_changes' ) ){
+	    function sez_get_changes( $args ){
+		    global $wpdb;
+		    
+		    // $where_site = "";
+		    
+		    // if ( isset( $args[ "site" ] ) && (int)$args[ "site" ] !== 0 ){
+			//     $site_id = (int)$args[ "site" ];
+			//     $where_site = " AND site_id = {$site_id}";
+		    // }
+		    
+		    // $sql = "SELECT COUNT(*) as row_count FROM {$wpdb->prefix}sf_test_history WHERE 1=1 {$where_site}";
+		    // $results = $wpdb->get_results( $sql, ARRAY_A );
+		    
+		    // $count = (int)$results[0][ "row_count" ];
+		    // if ( $count === 0 ){ 
+			//     return array(
+			// 	    "page" => 0,
+			// 	    "total_results" => 0,
+			// 	    "total_pages" => 0,
+			// 	    "results_per_page" => 0,
+			// 	    "results" => array()
+			//     );
+			// }
+		    
+		    // $limit = isset( $args[ "limit" ] ) ? (int)$args[ "limit" ] : 10;
+		    
+		    // // Ensure we don't divide by zero.
+		    // if ( $limit === 0 ){
+			//     $limit = 10;
+		    // }
+		    
+		    // $page = isset( $args[ "page" ] ) ? (int)$args[ "page" ] : 1;
+		    
+		    // // Never have a zero page.
+		    // if ( $page === 0 ){
+			//     $page = 1;
+		    // }
+		    
+		    // $total_pages = intval( $count / $limit );
+		    // $remainder = $results % $limit;
+		    
+		    // if ( $remainder > 0 ){ $total_pages++; }
+		    
+		    // $offset = ( $page - 1 ) * $limit;
+		    // $offset = (int)$offset;
+		    
+		    // $sql = "SELECT * FROM {$wpdb->prefix}sf_test_history WHERE 1=1 {$where_site} ORDER BY `start_time` DESC LIMIT {$limit} OFFSET {$offset}";
+		    // $results = $wpdb->get_results( $sql, ARRAY_A );
+		    
+		    // return array(
+			//     "page" => $page,
+			//     "total_results" => $count,
+			//     "total_pages" => $total_pages,
+			//     "results_per_page" => $limit,
+			//     "results" => is_null( $results ) ? array() : $results
+		    // );
+	    }
+    }
+
 ?>

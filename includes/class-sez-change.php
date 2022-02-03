@@ -2,13 +2,21 @@
 
     class SEZ_Change {
 
-        private $operation = "";
+        public $operation = "";
 
-        private $table = "";
+        public $table = "";
         
-        private $primary_key = "";
+        public $primary_key = "";
         
-        private $data = array();
+        public $data = array();
+
+        public $id = 0;
+
+        public $job_id = "";
+
+        public $synced = "";
+
+        public $synced_at = "";
 
         function __construct( $operation, $table, $primary_key, $data ){
             global $wpdb;
@@ -259,6 +267,15 @@
                 return $result;
             }
 
+            // Update synced status.
+            if ( !empty( $this->id ) ){
+                $wpdb->update(
+                    $wpdb->prefix . "sez_changes",
+                    array( "synced" => 1 ),
+                    array( "ID" => $this->id )
+                );
+            }
+
             /**
              * Allows values to be added to the live/dev site map.
              * This is where users would create mappings for different tables based on the result of a query.
@@ -274,6 +291,96 @@
             do_action( "sez_after_change_execute", $this->table, $this->operation, $this->primary_key, $result, $fields[ $primary_key_index ] );
 
             return true;
+        }
+
+
+        /**
+         *  Saves change to database.
+         * 
+         */
+        public function save( $job_id ){
+            global $wpdb;
+
+            $inserted = $wpdb->insert(
+                $wpdb->prefix . "sez_changes",
+                array(
+                    "operation" => $this->operation,
+                    "table" => $this->table,
+                    "primary_key" => $this->primary_key,
+                    "data" => serialize( $this->data ),
+                    "job_id" => $job_id,
+                    "synced" => 0,
+                    "synced_at" => current_time( 'mysql' )
+                )
+            );
+            if ( false == $inserted ){ return false; }
+            return true;
+        }
+
+
+        public function get_label(){
+            global $wpdb;
+            
+            $label = "Change detected.";
+
+            if ( $this->table === $wpdb->comments || $this->table === $wpdb->users ){
+                $item = $this->table === $wpdb->comments ? "comment" : "user";
+                if ( $this->operation === "CREATE" ){
+                    $label = "New {$item} created.";
+                } elseif( $this->operation === "UPDATE" ){
+                    $label = ucfirst( $item ) . " updated.";
+                } else {
+                    $label = ucfirst( $item ) . " was deleted.";
+                }
+            } elseif( $this->table === $wpdb->usermeta ){
+                if ( $this->operation === "CREATE" ){
+                    $label = "Created new user metadata.";
+                } elseif( $this->operation === "UPDATE" ){
+                    $label = "User metadata was updated.";
+                } else {
+                    $label = "User metadata was deleted.";
+                }
+            }
+            return apply_filters( "sez_change_label", $label, $this->table, $this->operation, $this->data );
+        }
+
+
+        public function as_data(){
+            return array(
+                "ID" => $this->id,
+                "table" => $this->table,
+                "operation" => $this->operation,
+                "job_id" => $this->job_id,
+                "synced" => $this->synced,
+                "synced_at" => $this->synced_at,
+                "primary_key" => $this->primary_key,
+                "data" => $this->data,
+                "label" => $this->get_label()
+            );
+        }
+
+
+        /**
+         * Init SEZ_Change object from db record.
+         */
+        public static function db_init( $args ){
+            $required_args = array( "ID", "operation", "table", "primary_key", "data", "job_id", "synced", "synced_at" );
+            foreach ( $required_args as $arg ){
+                if ( !isset( $args[ $arg ] ) ){
+                    return new WP_Error( "change_init_error", "Missing param {$arg}." );
+                }
+            }
+            $change = new SEZ_Change(
+                $args[ "operation" ], 
+                $args[ "table" ], 
+                $args[ "primary_key" ], 
+                unserialize( $args[ "data" ] ) 
+            );
+            $change->id = $args[ "ID" ];
+            $change->job_id = $args[ "job_id" ];
+            $change->synced = $args[ "synced" ];
+            $change->synced_at = $args[ "synced_at" ];
+            return $change;
         }
     }
 

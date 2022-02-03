@@ -64,3 +64,13 @@ body {
 .sez-active {
     display: block;
 }
+#sez_sync_modal_close_button {
+    position: absolute;
+    top: 30px;
+    right: 10px;
+    height: 40px;
+    width: auto;
+}
+#sez_sync_modal_close_button:hover {
+    cursor: pointer;
+}

@@ -66,6 +66,11 @@
                 ),
                 // Queue 5
                 array(
+                    array( "action" => "replace_existing_dump", "job_id" => $job_id ),
+                    //array( "action" => "save_changes_to_db", "job_id" => $job_id )
+                ),
+                array(
+                    //array( "action" => "perform_changes", "job_id" => $job_id ),
                     array( "action" => "done", "job_id" => $job_id )
                 )
             );
@@ -78,7 +83,7 @@
             $jobdata = get_option( $job_id );
 
             // When an error exists, no other processes run.
-            if ( isset( $jobdata[ "error" ] ) ){
+            if ( !empty( $this->get_job_param( $job_id, "error", "" ) ) ){
                 return false;
             }
 
@@ -193,7 +198,7 @@
 
         private function handle_error( $job_id, $err ){
             $message = $err->get_error_message();
-            $this->set_job_param( $job_id, "error", $message );
+            $this->set_job_param( $job_id, "error", $message, "" );
 
             $jobdata = get_option( $job_id );
             self::log( $jobdata[ "log" ], $message, "ERROR" );
@@ -212,6 +217,14 @@
 
 
         public static function log( $file, $message, $type = "INFO" ){
+            // Incorporate log levels.
+            if ( !isset( SEZ_LOG_LEVELS[ $type ] ) ){ return; }
+
+            $level = SEZ_LOG_LEVELS[ $type ];
+            $app_level = SEZ_LOG_LEVELS[ SEZ_LOG_LEVEL ];
+
+            if ( $level > $app_level ){ return; }
+
             $timestamp = current_time( 'mysql' );
             $line = "{$timestamp} [{$type}] {$message}\n";
             file_put_contents( $file, $line, FILE_APPEND );

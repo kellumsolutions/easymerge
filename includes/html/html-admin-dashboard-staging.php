@@ -58,7 +58,7 @@
                         </tr>
                         <tbody>
                             <?php
-                                $rules = SEZ_Rules::get_rules();
+                                $rules = SEZ_Rules::get_rules( false );
                                 foreach ( $rules as $rule ):
                             ?>
                                     <tr>
@@ -110,6 +110,7 @@
 
     <!-- Sync modal -->
     <div id="sez_sync_modal" :class="{active: sync.show_console}" style="padding-top:100px">
+        <img :class="{ 'sez-hidden': sync.processing }" id="sez_sync_modal_close_button" v-on:click="close_console" src="<?= SEZ_ASSETS_URL; ?>icons/3x/close-icon@3x.png" />
         <div class="container" style="max-width:1000px">
             <div class="row">
                 <div class="col-9">

@@ -82,18 +82,14 @@
             // Request to change which rules are enabled.
             } elseif ( isset( $_POST[ "sez-edit-rules" ] ) ){
                 $rules_to_enable = array();
-                $rules_to_disable = array();
-                $rules = SEZ_Rules::get_rules();
+                $rules = SEZ_Rules::get_rules( false );
                 foreach( $rules as $index => $rule ){
                     $id = $rule[ "id" ];
                     if ( isset( $_POST[ $id ] ) ){
                         $rules_to_enable[] = $id;
-                    } else {
-                        $rules_to_disable[] = $id;
-                    }
+                    } 
                 }
                 SEZ_Rules::enable_rules( $rules_to_enable );
-                SEZ_Rules::disable_rules( $rules_to_disable );
             }
 
             $sez_settings = get_option( 'sez_site_settings' );
@@ -171,6 +167,21 @@
             if ( $handle ) {
                 while ( ( $line = fgets( $handle ) ) !== false) {
                     $output[] = $line;
+                    
+                    // Search for error.
+                    if ( strpos( $line, "[ERROR]" ) !== false ){
+                        $components = explode( "[ERROR]", $line );
+                        $message = $components[ count( $components ) - 1 ];
+                        return wp_send_json_error( 
+                            new WP_Error( 
+                                "get_sync_status_error", 
+                                array( 
+                                    "err_message" => $message, 
+                                    "output" => $output 
+                                )
+                            )
+                        );
+                    }
                 }
                 fclose($handle);
 

@@ -32,7 +32,7 @@ jQuery( document ).ready( function( $ ){
                     tracking: false,
                     interval: false,
                     job_id: "",
-                    output: [ "sync starting..." ],
+                    output: [ "Starting sync..." ],
                     error: "",
                     additional_output: ""
                 },
@@ -134,7 +134,8 @@ jQuery( document ).ready( function( $ ){
                                 response.data.length > 0 && 
                                 "message" in response.data[0] 
                             ){
-                                message = response.data[0].message;
+                                message = response.data[0].message[ "err_message" ];
+                                self.sync.output = response.data[0].message[ "output" ];
                             }
                             self.sync.error = message;
                         }
@@ -148,6 +149,13 @@ jQuery( document ).ready( function( $ ){
                     .always( function(){
                         
                     });
+                },
+
+                close_console: function(){
+                    this.sync.show_console = false;
+                    this.sync.output = [ "Starting sync..." ];
+                    this.sync.error = "";
+                    this.sync.additional_output = "";
                 }
             },
             created: function(){

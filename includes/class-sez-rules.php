@@ -23,7 +23,7 @@
                     array(
                         "include_all_comments",
                         "include_all_users",
-                        "include_all_usermeta"
+                        // "include_all_usermeta"
                     )
                 );
                 if ( is_wp_error( $result ) ){
@@ -42,37 +42,29 @@
                 return new WP_Error( "enable_rules_error", "Unable to retrieve saved rules." );
             }
 
-            $enabled_rules = isset( $rule_opts[ "enabled" ] ) ? $rule_opts[ "enabled" ] : array();
-            $enabled_rules = array_merge( $enabled_rules, $rule_ids );
-            $rule_opts[ "enabled" ] = $enabled_rules;
-            return self::save_rule_options( $rule_opts );
-        }
+            $enabled_rules = array();
 
-
-        // TODO: -  Really inefficient. Find a way to optimize this.
-        public static function disable_rules( $rule_ids = array() ){
-            $rule_opts = get_option( self::$option );
-
-            // Should never occur. Sanity check.
-            if ( false === $rule_opts ){
-                return new WP_Error( "enable_rules_error", "Unable to retrieve saved rules." );
+            foreach ( $rule_ids as $id ){
+                $enabled_rules[] = $id;
             }
-            $enabled_rules = isset( $rule_opts[ "enabled" ] ) ? $rule_opts[ "enabled" ] : array();
-            $enabled_rules = array_diff( $enabled_rules, $rule_ids );
             $rule_opts[ "enabled" ] = $enabled_rules;
             return self::save_rule_options( $rule_opts );
         }
 
-
+        
         public static function save_rule_options( $rule_opts ){
             update_option( self::$option, $rule_opts );
             return true;
         }
 
 
-        public static function get_rules(){
+        public static function get_rules( $expand_groups = true ){
             $rules = self::get_default_rules();
             $rules = apply_filters( 'sez_additional_rules', $rules );
+
+            // Parse rules. Flesh out groups.
+            // Ensure there are no duplicate rules.
+            $rules = self::parse_rules( $rules, $expand_groups );
 
             $rule_opts = get_option( self::$option );
             $enabled_rule_map = array();
@@ -84,6 +76,75 @@
 
             foreach ( $rules as &$rule ){
                 $rule[ "enabled" ] = isset( $enabled_rule_map[ $rule[ "id" ] ] );
+
+                // Set enabled property for sub rules.
+                // If parent rule is enabled, enable all the sub rules.
+                // "parent_group" property is only set when $expand_groups is true.
+                if ( isset( $rule[ "parent_group" ] ) && isset( $enabled_rule_map[ $rule[ "parent_group" ] ] ) ){
+                    $rule[ "enabled" ] = true;
+                }
+            }
+            return $rules;
+        }
+
+
+        // public static function get_rules_as_groups(){
+        //     $rules = self::get_rules();
+        //     $output = array();
+        //     $map = array();
+
+        //     $raw_rules = self::get_default_rules();
+        //     $raw_rules = apply_filters( 'sez_additional_rules', $rules );
+
+        //     foreach ( $rules as $rule ){
+        //         // Individual rule.
+        //         if ( !isset( $rule[ "parent_group" ] ) ){
+        //             $output[] = $rule;
+        //             continue;
+        //         }
+
+        //         $group = $rule[ "parent_group" ];
+        //         if ( !isset( $map[ $group ] ) ){
+        //             $rules
+        //         }
+        //     }
+        // }
+
+
+
+        /**
+         * Verifies rules are accurate and ready for processing.
+         * 
+         * TODO: Maybe output already existing rule as a notice/alert on the front end?
+         */
+        public static function parse_rules( $raw_rules, $expand_groups = true ){
+            $rules = array();
+            $rule_map = array();
+
+            foreach ( $raw_rules as $rule ){
+                // Rule group.
+                if ( $expand_groups && isset( $rule[ "group" ] ) && true == (int)$rule[ "group" ] ){
+                    foreach ( $rule[ "rules" ] as &$sub_rule ){
+                        $sub_rule_id = $sub_rule[ "id" ];
+
+                        if ( isset( $rule_map[ $sub_rule_id ] ) ){
+                            // Sub rule already exists.
+                            continue;
+                        }
+                        $sub_rule[ "parent_group" ] = $rule[ "id" ];
+                        $rules[] = $sub_rule; 
+                        $rule_map[ $sub_rule_id ] = 1;
+                    }
+                
+                } else {
+                    $rule_id = $rule[ "id" ];
+                    if ( isset( $rule_map[ $rule_id ] ) ){
+                        // Rule already exists.
+                        continue;
+                    }
+                    $rules[] = $rule; 
+                    $rule_map[ $rule_id ] = 1;
+                }
             }
             return $rules;
         }
@@ -100,6 +161,7 @@
                 if ( false === $rule[ "enabled" ] ){ continue; }
                 
                 $table = $rule[ "table" ];
+                
                 if ( empty( $allow_prefix ) ){
                     $table = substr( $table, strlen( $wpdb->prefix ) );
                 }
@@ -210,20 +272,28 @@
                 ),
                 array(
                     "id" => "include_all_users",
-                    "description" => "Allows all users.",
-                    "table" => $wpdb->users,
-                    "policy" => "include",
-                    "priority" => 20,
-                    "conditions" => array()
-                ),
-                array(
-                    "id" => "include_all_usermeta",
-                    "description" => "Allows all user metadata. This should be enabled whenever 'include_all_users' is enabled.",
-                    "table" => $wpdb->usermeta,
-                    "policy" => "include",
-                    "priority" => 20,
-                    "conditions" => array()
-                ),
+                    "description" => "Allows all users",
+                    "group" => true,
+                    "rules" => array(
+                        array(
+                            "id" => "include_all_users_raw",
+                            "description" => "Allows all users.",
+                            "table" => $wpdb->users,
+                            "policy" => "include",
+                            "priority" => 20,
+                            "conditions" => array()
+                        ),
+                        array(
+                            "id" => "include_all_usermeta",
+                            "description" => "Allows all user metadata.",
+                            "table" => $wpdb->usermeta,
+                            "policy" => "include",
+                            "priority" => 20,
+                            "conditions" => array()
+                        ),
+                    )
+                )
+                
                 // array(
                 //     "id" => "include_woocommerce_products_meta",
                 //     "table" => $wpdb->postmeta,
