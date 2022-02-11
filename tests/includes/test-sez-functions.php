@@ -57,6 +57,16 @@ class Test_SEZ_Functions extends WP_UnitTestCase {
     }
 
 
+    function test_remove_table_prefix(){
+        global $wpdb;
+
+        $this->assertTrue( "posts" === sez_remove_table_prefix( $wpdb->posts ) );
+        $this->assertTrue( "Some_cool_Table_name" === sez_remove_table_prefix( $wpdb->prefix . "Some_cool_Table_name" ) );
+        $this->assertTrue( "g" === sez_remove_table_prefix( $wpdb->prefix . "g" ) );
+        $this->assertTrue( "woocommerce_orders" === sez_remove_table_prefix( "woocommerce_orders" ) );
+    }
+
+
     function ezsa_rmdir( $dir ){
         if (is_dir( $dir ) ) { 
             $objects = scandir($dir);

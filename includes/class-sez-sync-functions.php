@@ -309,6 +309,48 @@
         }
 
 
+        /**
+         * Where plugins can keep foreign keys and other data in sync.
+         * 
+         */
+        public static function perform_adjustments( $job_id, $log ){
+            global $wpdb;
+
+            $with_prefix = false;
+            $tables = sez_get_tables( $with_prefix );
+
+            foreach ( $tables as $table ){
+                $sql = "SELECT * FROM {$wpdb->prefix}sez_changes WHERE job_id = %s AND synced = 1 AND table = %s";
+                $results = $wpdb->get_results(
+                    $wpdb->prepare( $sql, $job_id, $table ),
+                    ARRAY_A
+                );
+                if ( is_null( $results ) ){
+                    return new WP_Error( "sez_sync_error", "Unable to get changes for job ID {$job_id} from " . $wpdb->prefix . $table . " from database." );
+                }
+
+                if ( empty( $results ) ){ continue; }
+
+                $changes = array();
+                
+                foreach( $results as $index => $result ){
+                    $change = SEZ_Change::db_init( $result );
+
+                    if ( is_wp_error( $change ) ){
+                        $id = $result[ "ID" ];
+                        SEZ_Sync::log( $log, "Unable to get database change. ID: {$id}.", "WARNING" );
+                        
+                    } else {
+                        $changes[] = $change;
+                    }
+                }
+
+                do_action( "sez_perform_adjustments_" . $wpdb->prefix . $table, $changes, $job_id, $log );
+            }
+            return true;
+        }
+
+
         public static function done( $job_id, $log ){
             SEZ_Sync::log( $log, "Done." );
         }

@@ -2,7 +2,7 @@
 
 
     if ( !function_exists( 'sez_get_tables' ) ){
-        function sez_get_tables(){
+        function sez_get_tables( $with_prefix = true ){
             global $wpdb;
 
             $sql = "SHOW TABLES";
@@ -15,10 +15,26 @@
             $tables = array();
             foreach( $results as $result ){
                 foreach ( $result as $key => $table ){
-                    $tables[] = $table;
+                    $tables[] = $with_prefix ? $table : sez_remove_table_prefix( $table );
                 }
             }
             return $tables;
+        }
+    }
+
+
+    if ( !function_exists( 'sez_remove_table_prefix' ) ){
+        function sez_remove_table_prefix( $table ){
+            global $wpdb;
+
+            $prefix = strtolower( $wpdb->prefix );
+            $prefix_length = strlen( $prefix );
+
+            if ( strlen( $table ) <= $prefix_length ){ return $table; }
+            if ( $prefix === strtolower( substr( $table, 0, $prefix_length ) ) ){
+                return substr( $table, $prefix_length );
+            }
+            return $table;
         }
     }
 

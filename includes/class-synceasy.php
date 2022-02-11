@@ -37,7 +37,7 @@
         }
 
         function includes(){
-            include_once SEZ_ABSPATH . '/vendor/autoload.php';
+            //include_once SEZ_ABSPATH . '/vendor/autoload.php';
 
             include_once SEZ_ABSPATH . '/includes/class-sez-install.php';
             include_once SEZ_ABSPATH . '/includes/sez-functions.php';
