@@ -308,8 +308,8 @@
     }
 
 
-    if ( !function_exists( "sez_adjust_primary_key" ) ){
-        function sez_adjust_primary_key( $data, $table, $primary_key_index, $operation ){
+    if ( !function_exists( "sez_adjust_primary_key_for_updates_deletes" ) ){
+        function sez_adjust_primary_key_for_updates_deletes( $data, $table, $primary_key_index, $operation ){
             if ( $operation === "CREATE" ){
                 return $data;
             }

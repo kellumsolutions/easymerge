@@ -320,9 +320,9 @@
             $tables = sez_get_tables( $with_prefix );
 
             foreach ( $tables as $table ){
-                $sql = "SELECT * FROM {$wpdb->prefix}sez_changes WHERE job_id = %s AND synced = 1 AND table = %s";
+                $sql = "SELECT * FROM {$wpdb->prefix}sez_changes WHERE job_id = %s AND synced = 1 AND `table` = %s";
                 $results = $wpdb->get_results(
-                    $wpdb->prepare( $sql, $job_id, $table ),
+                    $wpdb->prepare( $sql, $job_id, $wpdb->prefix . $table ),
                     ARRAY_A
                 );
                 if ( is_null( $results ) ){
@@ -345,7 +345,9 @@
                     }
                 }
 
-                do_action( "sez_perform_adjustments_" . $wpdb->prefix . $table, $changes, $job_id, $log );
+                if ( !empty( $changes ) ){
+                    do_action( "sez_perform_adjustments_" . $wpdb->prefix . $table, $changes, $job_id, $log );
+                }
             }
             return true;
         }

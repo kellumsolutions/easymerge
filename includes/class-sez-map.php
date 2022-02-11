@@ -10,6 +10,7 @@
         }
 
         public static function get_value( $table, $primary_field, $value, $default = false ){
+            $table = sez_remove_table_prefix( $table );
             $map = self::retrieve();
 
             if ( !empty( $map ) ){
@@ -22,6 +23,7 @@
 
 
         public static function insert( $table, $primary_field, $previous_value, $new_value ){
+            $table = sez_remove_table_prefix( $table );
             $map = self::retrieve();
 
             $map[ $table ][ $primary_field ][ $previous_value ] = $new_value;
@@ -31,6 +33,27 @@
 
         public static function save( $map ){
             return update_option( self::$option_name, $map );
+        }
+
+
+        /**
+         * Inverse of SEZ_Map::get_value.
+         * Gets the live site value based on the dev site value.
+         */
+        public static function get_value_reverse( $table, $primary_field, $value ){
+            $table = sez_remove_table_prefix( $table );
+            $map = self::retrieve();
+
+            if ( !empty( $map ) ){
+                if ( isset( $map[ $table ][ $primary_field ] ) ){
+                    $items = $map[ $table ][ $primary_field ];
+                    foreach ( $items as $live_value => $dev_value ){
+                        if ( $value == $dev_value ){
+                            return $live_value;
+                        }
+                    }
+                }
+            }
         }
     }
 

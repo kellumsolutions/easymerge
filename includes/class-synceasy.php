@@ -62,7 +62,7 @@
             register_activation_hook( SEZ_PLUGIN_FILE, array( 'SEZ_Install', 'install' ) );
 
             add_action( "sez_after_change_execute", "sez_save_mapping", 20, 5 );
-            add_filter( "sez_before_change_execute", "sez_adjust_primary_key", 10, 4 );
+            add_filter( "sez_before_change_execute", "sez_adjust_primary_key_for_updates_deletes", 10, 4 );
 
             add_action( "init", array( $this, "on_init" ) );
         }
