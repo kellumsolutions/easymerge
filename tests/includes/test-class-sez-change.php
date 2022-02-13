@@ -6,7 +6,27 @@
  */
 
 class Test_SEZ_Change extends WP_UnitTestCase {
+
     function test_find_rule(){
+        global $wpdb;
+
+        // Add in additional rules.
+        add_filter( 'sez_additional_rules', function( $current_rules ){
+            foreach ( $this->get_additional_rules() as $rule ){
+                $current_rules[] = $rule;
+            }
+            return $current_rules;
+        }, 20 );
+
+        // Enable additional rules.
+        SEZ_Rules::enable_rules(
+            array(
+                "include_all_users",
+                "ezsw_include_all_orders",
+                "include_all_comments"
+            )
+        );
+
         $operation = "CREATE";
         $primary_key = 1;
         $table = "comments";
@@ -15,6 +35,54 @@ class Test_SEZ_Change extends WP_UnitTestCase {
         $rule = $change->find_rule();
 
         $this->assertTrue( "include_all_comments" === $rule );
+
+        $operation = "UPDATE";
+        $primary_key = 0;
+        $table = $wpdb->posts;
+        $data = array( "12", "3", "", "", "test content", "sample post title", "", "pending", "closed", "closed", "", "sample-post-title", "", "", "", "", "", "0", "12", "0", "page", "", "5" );
+        $change = new SEZ_Change( $operation, $table, $primary_key, $data );
+        $rule = $change->find_rule();
+       
+        $this->assertTrue( "ezsw_include_all_order_posts" === $rule ); 
+
+        $data[20] = "product";
+        $change = new SEZ_Change( $operation, $table, $primary_key, $data );
+        $rule = $change->find_rule();
+        $this->assertTrue( true === empty( $rule ) ); 
+    }
+
+
+    public function get_additional_rules(){
+        global $wpdb;
+
+        $rules = array(
+            array(
+                "id" => "ezsw_include_all_orders",
+                "group" => true,
+                "description" => "Allows test rules.",
+                "rules" => array(
+                    array(
+                        "id" => "ezsw_include_all_order_posts",
+                        "table" => $wpdb->posts,
+                        "policy" => "include",
+                        "conditions" => array(
+                            array(
+                                "field" => "post_type",
+                                "operator" => "==",
+                                "values" => array( "page", "post" )
+                            )
+                        )
+                    ),
+                    array(
+                        "id" => "ezsw_include_all_order_postmeta",
+                        "table" => $wpdb->postmeta,
+                        "policy" => "include",
+                        "conditions" => array()
+                    ),
+                )
+            )
+        );
+        return $rules;
     }
 
 

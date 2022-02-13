@@ -61,7 +61,7 @@
         public static function get_rules( $expand_groups = true ){
             $rules = self::get_default_rules();
             $rules = apply_filters( 'sez_additional_rules', $rules );
-
+           
             // Parse rules. Flesh out groups.
             // Ensure there are no duplicate rules.
             $rules = self::parse_rules( $rules, $expand_groups );
@@ -183,7 +183,6 @@
                 if ( false === $rule[ "enabled" ] ){ continue; }
 
                 $table = $rule[ "table" ];
-                $policy = $rule[ "policy" ];
 
                 if ( !isset( $output[ $table ] ) ){
                     $output[ $table ] = array();
@@ -197,7 +196,7 @@
                     $primary_key = sez_get_table_primary_key( $table );
                     $expression = new SEZ_Rule_Equality_Expression( "*" );
                     $expression->add_rule( $rule );
-                    $output[ $table ][ $primary_key ][ $policy ][ "==" ][] = $expression;
+                    $output[ $table ][ $primary_key ][ "==" ][] = $expression;
                 
                 } else {
                     foreach( $rule[ "conditions" ] as $condition ){
@@ -206,8 +205,8 @@
                         $values = $condition[ "values" ];
     
                         //foreach ( $fields as $field ){
-                        if ( !isset( $output[ $table ][ $field ][ $policy ][ $operator ] ) ){
-                            $output[ $table ][ $field ][ $policy ][ $operator ] = array();
+                        if ( !isset( $output[ $table ][ $field ][ $operator ] ) ){
+                            $output[ $table ][ $field ][ $operator ] = array();
                         }
     
                         $expression = false;
@@ -224,7 +223,7 @@
     
                         if ( $expression ){
                             $expression->add_rule( $rule );
-                            $output[ $table ][ $field ][ $policy ][ $operator ][] = $expression;
+                            $output[ $table ][ $field ][ $operator ][] = $expression;
                         }    
                     }
                 }

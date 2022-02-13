@@ -55,38 +55,31 @@
             if ( !$fields ){
                 $fields = sez_get_table_columns( $this->table );
             }
-
-        
+            
             if ( !isset( $rules[ $this->table ] ) ) { return false; }
 
             $table_rules = $rules[ $this->table ];
-
+            
             // Retrieve the value of the field that has rules.
             // Determine if the value qualifies it for the rule.
             foreach ( $table_rules as $field => $policy_map ){
                 $field_index = array_search( $field, $fields );
-
+                
                 // Field in rules does not exist on the table.
                 // Invalid rule was passed.
                 if ( false === $field_index || is_null( $field_index ) ){
                     continue;
                 }
+                if ( !isset( $rules[ $this->table ][ $field ] ) ){ continue; }
 
-                for( $i=0;$i<2;$i++ ){
-                    $policy = $i === 0 ? "exclude" : "include";
-
-                    if ( !isset( $rules[ $this->table ][ $field ][ $policy ] ) ){ continue; }
-
-                    // Get value of field from diff file.
-                    $value = $this->data[ $field_index ];
-                    foreach ( $rules[ $this->table ][ $field ][ $policy ] as $operator => $expressions ){
-                        foreach ( $expressions as $expression ){
-                            $rule = $expression->get_rules( $value );
-                            if ( $rule ){
-                                //$this->rule = $rule;
-                                //return;
-                                return $rule;
-                            }
+                // Get value of field from diff file.
+                $value = $this->data[ $field_index ];
+                
+                foreach ( $rules[ $this->table ][ $field ] as $operator => $expressions ){
+                    foreach ( $expressions as $expression ){
+                        $rule = $expression->get_rules( $value );
+                        if ( $rule ){
+                            return $rule;
                         }
                     }
                 }
