@@ -215,6 +215,11 @@
         }
 
 
+        /**
+         * TODO:    - Incorporate plugin filter function for changes.
+         *          - If change doesn't pass filter function, don't save to db. 
+         *          - This allows plugins that include all items from a table to filter on more specific change data.
+         */
         public static function save_changes_to_db( $job_id, $log ){
             // Read changes from file.
             // Repetitive.

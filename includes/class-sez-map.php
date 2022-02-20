@@ -4,9 +4,17 @@
 
         protected static $option_name = "sez_map";
 
-        public static function retrieve(){
+        public static function retrieve( $table = false ){
             $map = get_option( self::$option_name );
-            return false === $map ? array() : $map;
+            $map = false === $map ? array() : $map;
+
+            if ( !empty( $table ) ){
+                $table = sez_remove_table_prefix( $table );
+                if ( isset( $map[ $table ] ) ){
+                    return $map[ $table ];
+                } 
+            }
+            return $map;
         }
 
         public static function get_value( $table, $primary_field, $value, $default = false ){

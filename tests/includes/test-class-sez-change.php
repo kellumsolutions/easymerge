@@ -64,7 +64,7 @@ class Test_SEZ_Change extends WP_UnitTestCase {
                     array(
                         "id" => "ezsw_include_all_order_posts",
                         "table" => $wpdb->posts,
-                        "policy" => "include",
+                        // "policy" => "include",
                         "conditions" => array(
                             array(
                                 "field" => "post_type",
@@ -76,7 +76,7 @@ class Test_SEZ_Change extends WP_UnitTestCase {
                     array(
                         "id" => "ezsw_include_all_order_postmeta",
                         "table" => $wpdb->postmeta,
-                        "policy" => "include",
+                        // "policy" => "include",
                         "conditions" => array()
                     ),
                 )

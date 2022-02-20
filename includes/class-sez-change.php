@@ -48,10 +48,11 @@
          * @return null
          */
         public function find_rule( $rules = null, $fields = null ){
+            
             if ( !$rules ){
                 $rules = SEZ_Rules::get_processed_rules();
             }
-
+            
             if ( !$fields ){
                 $fields = sez_get_table_columns( $this->table );
             }
@@ -62,7 +63,8 @@
             
             // Retrieve the value of the field that has rules.
             // Determine if the value qualifies it for the rule.
-            foreach ( $table_rules as $field => $policy_map ){
+            foreach ( $table_rules as $field => $expressions_map ){
+                
                 $field_index = array_search( $field, $fields );
                 
                 // Field in rules does not exist on the table.
@@ -70,12 +72,13 @@
                 if ( false === $field_index || is_null( $field_index ) ){
                     continue;
                 }
-                if ( !isset( $rules[ $this->table ][ $field ] ) ){ continue; }
+                // if ( !isset( $rules[ $this->table ][ $field ] ) ){ continue; }
 
                 // Get value of field from diff file.
                 $value = $this->data[ $field_index ];
                 
-                foreach ( $rules[ $this->table ][ $field ] as $operator => $expressions ){
+                foreach ( $expressions_map as $operator => $expressions ){
+                // foreach ( $rules[ $this->table ][ $field ] as $operator => $expressions ){
                     foreach ( $expressions as $expression ){
                         $rule = $expression->get_rules( $value );
                         if ( $rule ){
@@ -211,28 +214,18 @@
                 return new WP_Error( "execute_changes_error", "Primary key does not exist." );
             }
 
-            /**
-             * Allows changes to be made to a query before its executed.
-             * This is where users can keep references synced that aren't foreign keys.
-             * 
-             * This is where the primary keys are adjusted when they differ from the 
-             * live site and staging site. Only matters on update and delete operations.
-             * 
-             * Only works for changes that are going to be added to the database.
-             * Doesn't work for existing database entries.
-             * 
-             * Ex.  If a products ID is 17 in the live site and 20 in the dev site and
-             *      that product ID is referenced in an option's value, the user can change
-             *      17 to 20 in the option's serialized value. 
-             * 
-             * @hooked sez_adjust_primary_key - 10
-             *      
-             */
             $data = array();
             foreach ( $fields as $index => $field ){
                 $data[] = $this->data[ $index ];
             }
-
+            
+            /**
+             * Primary key is adjusted for updates and deletes.
+             * This ensures the correct data is being updated/deleted for the 
+             * staging environment.
+             * 
+             * sez_adjust_primary_key_for_updates_deletes - 10
+             */
             $data = apply_filters( "sez_before_change_execute", $data, $this->table, $primary_key_index, $this->operation );
             
             // Validate returned data.

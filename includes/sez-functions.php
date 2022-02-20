@@ -313,7 +313,6 @@
             if ( $operation === "CREATE" ){
                 return $data;
             }
-            
             $initial_primary_key = $data[ $primary_key_index ];
 
             if ( is_wp_error( $primary_key_field = sez_get_table_primary_key( $table ) ) ){

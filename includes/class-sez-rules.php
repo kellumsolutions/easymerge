@@ -265,8 +265,8 @@
                     "id" => "include_all_comments",
                     "description" => "Allows all comments.",
                     "table" => $wpdb->comments,
-                    "policy" => "include",
-                    "priority" => 20,
+                    // "policy" => "include",
+                    // "priority" => 20,
                     "conditions" => array()
                 ),
                 array(
@@ -278,16 +278,16 @@
                             "id" => "include_all_users_raw",
                             "description" => "Allows all users.",
                             "table" => $wpdb->users,
-                            "policy" => "include",
-                            "priority" => 20,
+                            // "policy" => "include",
+                            // "priority" => 20,
                             "conditions" => array()
                         ),
                         array(
                             "id" => "include_all_usermeta",
                             "description" => "Allows all user metadata.",
                             "table" => $wpdb->usermeta,
-                            "policy" => "include",
-                            "priority" => 20,
+                            // "policy" => "include",
+                            // "priority" => 20,
                             "conditions" => array()
                         ),
                     )
