@@ -5,6 +5,8 @@
         public $operation = "";
 
         public $table = "";
+
+        public $table_w_prefix = "";
         
         public $primary_key = "";
         
@@ -22,7 +24,7 @@
             global $wpdb;
 
             $this->operation = $operation;
-            $this->table = $table;
+            $this->table = sez_remove_table_prefix( $table );
             $this->primary_key = $primary_key;
             $this->data = $data;
 
@@ -30,7 +32,7 @@
 
             // Add back table prefix if needed.
             if ( !in_array( $table, $tables ) ){
-                $this->table = $wpdb->prefix . $table;
+                $this->table_w_prefix = $wpdb->prefix . $table;
             }
         }
 
@@ -54,12 +56,12 @@
             }
             
             if ( !$fields ){
-                $fields = sez_get_table_columns( $this->table );
+                $fields = sez_get_table_columns( $this->table_w_prefix );
             }
             
-            if ( !isset( $rules[ $this->table ] ) ) { return false; }
+            if ( !isset( $rules[ $this->table_w_prefix ] ) ) { return false; }
 
-            $table_rules = $rules[ $this->table ];
+            $table_rules = $rules[ $this->table_w_prefix ];
             
             // Retrieve the value of the field that has rules.
             // Determine if the value qualifies it for the rule.
@@ -111,7 +113,7 @@
                 $create_data[ $field ] = $this->data[ $index ];
             }
 
-            $rows_inserted = $wpdb->insert( $this->table, $create_data );
+            $rows_inserted = $wpdb->insert( $this->table_w_prefix, $create_data );
             if ( !$rows_inserted ){
                 return new WP_Error( "perform_create_error", "Error creating new record." );
             }
@@ -143,7 +145,7 @@
                 $insert_data[ $field ] = $this->data[ $index ];
             }
 
-            $rows_updated = $wpdb->update( $this->table, $insert_data, $where );
+            $rows_updated = $wpdb->update( $this->table_w_prefix, $insert_data, $where );
 
             if ( false === $rows_updated ){
                 return new WP_Error( "perform_update_error", "Error performing update from change. Table: {$this->table}, PK: {$this->primary_key}." );
@@ -169,7 +171,7 @@
             $primary_key_field = $fields[ $primary_key_index ];
             $where = array( $primary_key_field => $this->primary_key );
 
-            $rows_deleted = $wpdb->delete( $this->table, $where );
+            $rows_deleted = $wpdb->delete( $this->table_w_prefix, $where );
 
             if ( false === $rows_deleted ){
                 return new WP_Error( "perform_delete_error", "Error deleting record from db. Table: {$this->table}, PK: {$this->primary_key}." );
@@ -193,7 +195,7 @@
             global $wpdb;
 
             if ( is_null( $fields ) ){
-                if ( is_wp_error( $fields = sez_get_table_columns( $this->table ) ) ){
+                if ( is_wp_error( $fields = sez_get_table_columns( $this->table_w_prefix ) ) ){
                     return $fields;
                 }
             }
@@ -203,7 +205,7 @@
             }
 
             if ( is_null( $primary_key_index ) ){
-                if ( is_wp_error( $primary_key_index = sez_get_primary_key_index( $this->table ) ) ){
+                if ( is_wp_error( $primary_key_index = sez_get_primary_key_index( $this->table_w_prefix ) ) ){
                     return $primary_key_index;
                 }
             }
@@ -226,7 +228,7 @@
              * 
              * sez_adjust_primary_key_for_updates_deletes - 10
              */
-            $data = apply_filters( "sez_before_change_execute", $data, $this->table, $primary_key_index, $this->operation );
+            $data = apply_filters( "sez_before_change_execute", $data, $this->table_w_prefix, $primary_key_index, $this->operation );
             
             // Validate returned data.
             if ( count( $fields ) !== count( $data ) ){
@@ -274,7 +276,7 @@
              * @hooked sez_save_mapping - 20
              * 
              */
-            do_action( "sez_after_change_execute", $this->table, $this->operation, $this->primary_key, $result, $fields[ $primary_key_index ] );
+            do_action( "sez_after_change_execute", $this->table_w_prefix, $this->operation, $this->primary_key, $result, $fields[ $primary_key_index ] );
 
             return true;
         }
@@ -309,8 +311,8 @@
             
             $label = "Change detected.";
 
-            if ( $this->table === $wpdb->comments || $this->table === $wpdb->users ){
-                $item = $this->table === $wpdb->comments ? "comment" : "user";
+            if ( $this->table_w_prefix === $wpdb->comments || $this->table_w_prefix === $wpdb->users ){
+                $item = $this->table_w_prefix === $wpdb->comments ? "comment" : "user";
                 if ( $this->operation === "CREATE" ){
                     $label = "New {$item} created.";
                 } elseif( $this->operation === "UPDATE" ){
@@ -318,7 +320,7 @@
                 } else {
                     $label = ucfirst( $item ) . " was deleted.";
                 }
-            } elseif( $this->table === $wpdb->usermeta ){
+            } elseif( $this->table_w_prefix === $wpdb->usermeta ){
                 if ( $this->operation === "CREATE" ){
                     $label = "Created new user metadata.";
                 } elseif( $this->operation === "UPDATE" ){
@@ -327,7 +329,7 @@
                     $label = "User metadata was deleted.";
                 }
             }
-            return apply_filters( "sez_change_label", $label, $this->table, $this->operation, $this->data );
+            return apply_filters( "sez_change_label", $label, $this->table_w_prefix, $this->operation, $this->data );
         }
 
 

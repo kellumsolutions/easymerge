@@ -51,26 +51,27 @@
                     array( "action" => "start", "job_id" => $job_id )
                 ),
                 // Queue 2
-                // array(
-                //     array( "action" => "validate", "job_id" => $job_id ),
-                //     array( "action" => "check_for_existing_dump", "job_id" => $job_id ),
-                //     array( "action" => "get_live_site_data", "job_id" => $job_id ),
-                // ),
-                // // Queue 3
-                // array(
-                //     array( "action" => "export_live_site", "job_id" => $job_id )
-                // ),
-                // // Queue 4
-                // array(
-                //     array( "action" => "fetch_changes", "job_id" => $job_id )
-                // ),
-                // // Queue 5
-                // array(
-                //     array( "action" => "replace_existing_dump", "job_id" => $job_id ),
-                //     //array( "action" => "save_changes_to_db", "job_id" => $job_id )
-                // ),
                 array(
-                    //array( "action" => "perform_changes", "job_id" => $job_id ),
+                    array( "action" => "validate", "job_id" => $job_id ),
+                    array( "action" => "check_for_existing_dump", "job_id" => $job_id ),
+                    array( "action" => "get_live_site_data", "job_id" => $job_id ),
+                ),
+                // Queue 3
+                array(
+                    array( "action" => "export_live_site", "job_id" => $job_id )
+                ),
+                // Queue 4
+                array(
+                    array( "action" => "fetch_changes", "job_id" => $job_id )
+                ),
+                // Queue 5
+                array(
+                    array( "action" => "replace_existing_dump", "job_id" => $job_id ),
+                    array( "action" => "save_changes_to_db", "job_id" => $job_id )
+                ),
+                array(
+                    array( "action" => "perform_changes", "job_id" => $job_id ),
+                    array( "action" => "perform_adjustments", "job_id" => $job_id ),
                     array( "action" => "done", "job_id" => $job_id )
                 )
             );

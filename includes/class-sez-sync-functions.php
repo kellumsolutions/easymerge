@@ -118,6 +118,8 @@
             if ( is_wp_error( $_changes ) ){
                 return $_changes;
             }
+
+            // file_put_contents( trailingslashit( ABSPATH ) . "test.txt", json_encode( $_changes ) );
             
             $estimated_size = sez_get_units( strlen( json_encode( $_changes ) ) );
             SEZ_Sync::log( $log, "Calculated " . count( $_changes ) . " new changes ({$estimated_size}) from the live site." );
@@ -299,6 +301,7 @@
             foreach ( $changes as $index => $change ){
                 if ( is_wp_error( $result = $change->execute() ) ){
                     SEZ_Sync::log( $log, "Change " . ( $index + 1 ) . "/" . count( $changes ) . ": Unable to execute change.", "WARNING" );
+                    SEZ_Sync::log( $log, "Change process error: " . $result->get_error_message(), "DEBUG" );
                     $unexecuted_changes++;
                 } else {
                     SEZ_Sync::log( $log, "Change " . ( $index + 1 ) . "/" . count( $changes ) . ": Executed successfully." );
@@ -323,11 +326,10 @@
 
             $with_prefix = false;
             $tables = sez_get_tables( $with_prefix );
-
             foreach ( $tables as $table ){
                 $sql = "SELECT * FROM {$wpdb->prefix}sez_changes WHERE job_id = %s AND synced = 1 AND `table` = %s";
                 $results = $wpdb->get_results(
-                    $wpdb->prepare( $sql, $job_id, $wpdb->prefix . $table ),
+                    $wpdb->prepare( $sql, $job_id, $table ),
                     ARRAY_A
                 );
                 if ( is_null( $results ) ){
