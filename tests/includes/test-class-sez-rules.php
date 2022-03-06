@@ -49,6 +49,12 @@ class Test_SEZ_Rules extends WP_UnitTestCase {
     }
 
 
+    function test_is_rule_enabled(){
+        $this->assertTrue( true === SEZ_Rules::is_rule_enabled( "include_all_comments" ) );
+        $this->assertTrue( false === SEZ_Rules::is_rule_enabled( "bad_rule" ) );
+    }
+
+
     public function get_additional_rules(){
         global $wpdb;
 

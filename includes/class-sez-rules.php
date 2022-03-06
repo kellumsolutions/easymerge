@@ -88,6 +88,18 @@
         }
 
 
+        public static function is_rule_enabled( $id ){
+            $expand_groups = false;
+            $rules = self::get_rules( $expand_groups );
+            foreach ( $rules as $rule ){
+                if ( $id === $rule[ "id" ] && $rule[ "enabled" ] ){
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
         // public static function get_rules_as_groups(){
         //     $rules = self::get_rules();
         //     $output = array();
@@ -265,8 +277,6 @@
                     "id" => "include_all_comments",
                     "description" => "Allows all comments.",
                     "table" => $wpdb->comments,
-                    // "policy" => "include",
-                    // "priority" => 20,
                     "conditions" => array()
                 ),
                 array(
@@ -278,53 +288,16 @@
                             "id" => "include_all_users_raw",
                             "description" => "Allows all users.",
                             "table" => $wpdb->users,
-                            // "policy" => "include",
-                            // "priority" => 20,
                             "conditions" => array()
                         ),
                         array(
                             "id" => "include_all_usermeta",
                             "description" => "Allows all user metadata.",
                             "table" => $wpdb->usermeta,
-                            // "policy" => "include",
-                            // "priority" => 20,
                             "conditions" => array()
                         ),
                     )
                 )
-                
-                // array(
-                //     "id" => "include_woocommerce_products_meta",
-                //     "table" => $wpdb->postmeta,
-                //     "policy" => "include",
-                //     "priority" => 30,
-                //     "conditions" => array(
-                //         array(
-                //             "field" => "meta_key",
-                //             "operator" => "==",
-                //             "values" => array(
-                //                 "_stock_status",
-                //                 "_manage_stock",
-                //                 "_sku",
-                //                 "_virtual",
-                //                 "_downloadable"
-                //             )
-                //         )
-                //     )
-                // ),
-                // array(
-                //     "id" => "exclude_woocommerce_products_meta_stock_status",
-                //     "table" => $wpdb->postmeta,
-                //     "policy" => "exclude",
-                //     "priority" => 30,
-                //     "conditions" => array(
-                //         array(
-                //             "field" => "meta_key",
-                //             "operator" => "==",
-                //             "values" => "_stock_status"
-                //         )
-                //     )
-                // ),
             );
         }
     }

@@ -353,9 +353,13 @@
                 }
 
                 if ( !empty( $changes ) ){
-                    do_action( "sez_perform_adjustments_" . $wpdb->prefix . $table, $changes, $job_id, $log );
+                    foreach ( $changes as $index => $change ){
+                        do_action( "sez_perform_adjustments_" . $wpdb->prefix . $table, $change, $job_id, $log );
+                    }
                 }
             }
+
+            do_action( "sez_post_perform_adjustments", $job_id, $log );
             return true;
         }
 

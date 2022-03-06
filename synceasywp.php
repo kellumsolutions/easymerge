@@ -6,7 +6,9 @@
  * Version: 1.0.0
  * Author URI: https://www.kellumsolutions.com/
  *
- *
+ * TODO: 
+ * 	- Add filter function to rules conditions, so data can be imported based on a 
+ *	 user defined function.
  */
  
 
