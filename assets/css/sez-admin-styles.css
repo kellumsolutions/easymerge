@@ -74,3 +74,14 @@ body {
 #sez_sync_modal_close_button:hover {
     cursor: pointer;
 }
+.sez-dynamic-button {
+    min-width:250px;
+}
+.sez-dynamic-button > span:nth-of-type(2),
+.sez-dynamic-button.processing > span:nth-of-type(1){
+    display: inline;
+}
+.sez-dynamic-button > span:nth-of-type(1),
+.sez-dynamic-button.processing > span:nth-of-type(2){
+    display: none;
+}

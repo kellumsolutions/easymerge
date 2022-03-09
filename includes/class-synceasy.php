@@ -48,6 +48,7 @@
             include_once SEZ_ABSPATH . '/includes/class-sez-map.php';
             include_once SEZ_ABSPATH . '/includes/class-sez-rules.php';
             include_once SEZ_ABSPATH . '/includes/class-sez-change.php';
+            include_once SEZ_ABSPATH . '/includes/class-sez-settings.php';
 
             include_once SEZ_ABSPATH . '/includes/class-sez-sync.php';
             include_once SEZ_ABSPATH . '/includes/class-sez-sync-functions.php';

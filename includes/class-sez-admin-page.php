@@ -8,6 +8,7 @@
             add_action( 'wp_ajax_sez_sync_changes', array( __CLASS__, 'sync_changes' ) );
             add_action( 'wp_ajax_sez_sync_get_status', array( __CLASS__, 'get_sync_status' ) );
             add_action( 'wp_ajax_sez_get_license_key', array( __CLASS__, 'get_license_key' ) );
+            add_action( 'wp_ajax_sez_admin_actions', array( __CLASS__, 'do_admin_actions' ) );
         }
 
 
@@ -42,45 +43,9 @@
 
 
         public static function output(){
-            $sez_error = "";
-
-            // Request to register site.
-            if ( isset( $_POST[ "sez_site_type" ] ) && isset( $_POST[ "sez_license_key" ] ) ){
-                // Send to API.
-                if ( empty( $_POST[ "sez_site_type" ] ) || !in_array( strtolower( $_POST[ "sez_site_type" ] ), array( "live", "staging" ) ) ){
-                    $sez_error = "Site type is required.";
-                
-                } else {
-                    $args = array(
-                        "ezs_license_key" => $_POST[ "sez_license_key" ]
-                    );
-
-                    if ( $_POST[ "sez_site_type" ] === "staging" ){
-                        $args[ "ezs_live_site" ] = isset( $_POST[ "sez_live_site" ] ) ? $_POST[ "sez_live_site" ] : "";
-                        $args[ "ezs_staging_site" ] = site_url();
-                        
-                    } else {
-                        $args[ "ezs_live_site" ] = site_url();
-                    }
-
-                    $response = SEZ_Remote_Api::create_new_registration( $args );                    
-                    if ( is_wp_error( $response ) ){
-                        $sez_error = $response->get_error_message();
-
-                    } else {
-                        $sez_settings = get_option( 'sez_site_settings' );
-                        $sez_settings[ "site_type" ] = strtolower( $_POST[ "sez_site_type" ] );
-                        $sez_settings[ "license" ] = sanitize_text_field( $_POST[ "sez_license_key" ] );
-
-                        if ( $_POST[ "sez_site_type" ] === "staging" ){
-                            $sez_settings[ "live_site" ] = $_POST[ "sez_live_site" ];
-                        }
-                        update_option( 'sez_site_settings', $sez_settings );
-                    }
-                }
             
             // Request to change which rules are enabled.
-            } elseif ( isset( $_POST[ "sez-edit-rules" ] ) ){
+            if ( isset( $_POST[ "sez-edit-rules" ] ) ){
                 $rules_to_enable = array();
                 $rules = SEZ_Rules::get_rules( false );
                 foreach( $rules as $index => $rule ){
@@ -92,47 +57,51 @@
                 SEZ_Rules::enable_rules( $rules_to_enable );
             }
 
+            /**
+             * Live Site:
+             *      - needs to be set if license or live site does not exist.
+             *      - is live site if "" and current domain matches lives site.
+             * 
+             * 
+             * Dev Site:
+             *      - needs to be set if license, live site is set. 
+             *        and current site domain is different than live site
+             *        and dev site is not set.
+             * 
+             *      - is dev site if all above is true and dev site is set.
+             */
+
             $sez_settings = get_option( 'sez_site_settings' );
-            // $sez_settings = array(
-            //     "site_type" => "staging",
-            //     "license" => "khjkjhkhj",
-            //     "live_site" => "gogreen.com"
-            // );
+            $sez_settings = array(
+                "site_type" => "staging",
+                "license" => "6227a35665913",
+                // "live_site" => "localhost/sample-store",
+                "live_site" => "https://bojangles.com",
+                // "dev_site" => "localhosts/sample-store"
+            );
 
-            // License not set.
-            if ( !isset( $sez_settings[ "license" ] ) || empty( $sez_settings[ "license" ] ) ){
-                require_once SEZ_ABSPATH . "includes/html/html-admin-dashboard-unset.php";
+            if ( !isset( $sez_settings[ "license" ] ) || !isset( $sez_settings[ "live_site" ] ) ){
+                require_once SEZ_ABSPATH . "includes/html/html-admin-dashboard-setup-live.php";
             
-            // Staging site.
-            } elseif ( isset( $sez_settings[ "site_type" ] ) && $sez_settings[ "site_type" ] === "staging" && isset( $sez_settings[ "live_site" ] ) ){
+            } elseif ( sez_clean_domain( site_url() ) === sez_clean_domain( $sez_settings[ "live_site" ] ) ) {
+                // Delete dev_site from site_options.
+                // In case this is a restore from a dev site.
                 $license_key = $sez_settings[ "license" ];
-                $live_site = $sez_settings[ "live_site" ];
-
-                // Request to store reference to live site.
-                if ( isset( $_POST[ "sez_store_reference" ] ) ){
-                    $response = self::store_reference( $license_key, $live_site, site_url() );
-                    if ( is_wp_error( $response ) ){
-                        // Do some kind of indication here.
-                        $sez_error = "Error occurred storing reference to site {$live_site}. ERROR: " . $response->get_error_message();
-                    }
-                }
-
-                // Check if live site dump exists.
-                $dump_exists = SEZ_Remote_Api::get_dump( $license_key, $live_site, site_url() );
-                if ( is_wp_error( $dump_exists ) ){
-                    // Do some kind of indication?
-                    $dump_exists = false;
-                }
-                require_once SEZ_ABSPATH . "includes/html/html-admin-dashboard-staging.php";
-            
-            // Live site.
-            } elseif ( isset( $sez_settings[ "site_type" ] ) && $sez_settings[ "site_type" ] === "live" ) {
-                $license_key = isset( $sez_settings[ "license" ] ) ? $sez_settings[ "license" ] : "";
                 require_once SEZ_ABSPATH . "includes/html/html-admin-dashboard-live.php";
             
-            // Catch all.
+            } elseif ( !isset( $sez_settings[ "dev_site" ] ) ){
+                $license_key = $sez_settings[ "license" ];
+                $live_site = $sez_settings[ "live_site" ];
+                require_once SEZ_ABSPATH . "includes/html/html-admin-dashboard-setup-dev.php";
+
+            } elseif ( sez_clean_domain( site_url() ) === sez_clean_domain( $sez_settings[ "dev_site" ] ) ) {
+                require_once SEZ_ABSPATH . "includes/html/html-admin-dashboard-staging.php";
+            
             } else {
-                require_once SEZ_ABSPATH . "includes/html/html-admin-dashboard-unset.php";
+                // Bad install.
+                // Dev domain name might have changed.
+                // Prompt reinstall (clean)? Clears dev_site in site_options so dev site is re-registered.
+                require_once SEZ_ABSPATH . "includes/html/html-admin-dashboard-bad-dev-install.php";
             }
         }
 
@@ -212,21 +181,100 @@
         }
 
 
-        private static function store_reference( $license_key, $live_domain, $staging_domain ){
-            $url = SEZ_Sync_Functions::export_site_db( $live_domain, $license_key );
-            if ( is_wp_error( $url ) ){
-                return $url;
-            }
+        public static function do_admin_actions(){
+            if ( isset( $_POST[ "register_live_site" ] ) ){
+                if ( !isset( $_POST[ "name" ] ) || empty( $_POST[ "name" ] ) ){
+                    return wp_send_json_error( new WP_Error( "admin_actions_error", "Name is required." ) );
+                }
 
-            $response = SEZ_Remote_Api::create_dump( $license_key, $live_domain, $staging_domain, $url );
-            $response = new SEZ_Api_Response( $response );
-            $response = $response->extract();
+                if ( !isset( $_POST[ "email" ] ) || empty( $_POST[ "email" ] ) ){
+                    return wp_send_json_error( new WP_Error( "admin_actions_error", "Email is required." ) );
+                }
 
-            if ( is_wp_error( $response ) ){
-                return $response;
+                // Create license key.
+                $response = SEZ_Remote_Api::create_license_key( $_POST[ "name" ], $_POST[ "email" ] );
+                if ( is_wp_error( $response ) ){
+                    return wp_send_json_error( $response );
+                }
+                $license_key = $response->license_key;
+
+                // Register live site.
+                $args = array(
+                    "ezs_live_site" => site_url(),
+                    "ezs_license_key" => $license_key
+                );
+                $response = SEZ_Remote_Api::create_new_registration( $args );
+                if ( is_wp_error( $response ) ){
+                    return wp_send_json_error( $response );
+                }
+
+                $props = array(
+                    "license_key" => $license_key,
+                    "live_site" => sez_clean_domain( site_url() )
+                );
+                SEZ_Settings::save_props( $props );
+                return wp_send_json_success( true );
+            
+            } elseif ( isset( $_POST[ "register_dev_site" ] ) ){
+                $settings = SEZ_Settings::get();
+                $license_key = $settings[ "license_key" ];
+                $live_site = $settings[ "live_site" ];
+                $args = array(
+                    "ezs_live_site" => $live_site,
+                    "ezs_staging_site" => site_url(),
+                    "ezs_license_key" => $license_key
+                );
+
+                // Store initial live site reference (dump).
+                $url = SEZ_Sync_Functions::export_site_db( $live_site, $license_key );
+                if ( is_wp_error( $url ) ){
+                    return wp_send_json_error( $url );
+                }
+
+                $response = SEZ_Remote_Api::create_dump( $license_key, $live_site, site_url(), $url );
+                $response = new SEZ_Api_Response( $response );
+                $response = $response->extract();
+
+                if ( is_wp_error( $response ) ){
+                    return wp_send_json_error( $response );
+                }
+
+                if ( false == $response->uploaded ){
+                    return wp_send_json_error( new WP_Error( "admin_actions_error", "There was an error creating the live site dump." ) );
+                }
+                    
+                // Create dev site registration.
+                $response = SEZ_Remote_Api::create_new_registration( $args ); 
+                if ( is_wp_error( $response ) ){
+                    return wp_send_json_error( $response );
+                }
+                
+                SEZ_Settings::save_props( array( "dev_site" => site_url() ) );
+                return wp_send_json_success( true );
+            
+            } elseif ( isset( $_POST[ "reset_dev_site" ] ) ){
+                $settings = SEZ_Settings::get();
+                unset( $settings[ "dev_site" ] );
+                SEZ_Settings::save( $settings );
             }
-            return $response->uploaded;
         }
+
+
+        // private static function store_reference( $license_key, $live_domain, $staging_domain ){
+        //     $url = SEZ_Sync_Functions::export_site_db( $live_domain, $license_key );
+        //     if ( is_wp_error( $url ) ){
+        //         return $url;
+        //     }
+
+        //     $response = SEZ_Remote_Api::create_dump( $license_key, $live_domain, $staging_domain, $url );
+        //     $response = new SEZ_Api_Response( $response );
+        //     $response = $response->extract();
+
+        //     if ( is_wp_error( $response ) ){
+        //         return $response;
+        //     }
+        //     return $response->uploaded;
+        // }
     }
 
     SyncEasy_Admin_Page::init();

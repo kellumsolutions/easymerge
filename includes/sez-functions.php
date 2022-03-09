@@ -408,4 +408,14 @@
 	    }
     }
 
+
+    if ( !function_exists( 'sez_clean_domain' ) ){
+        function sez_clean_domain( $domain ){
+            $domain = untrailingslashit( $domain );
+            $domain = str_replace( "https://", "", $domain );
+            $domain = str_replace( "http://", "", $domain );
+            return $domain;
+        }
+    }
+
 ?>

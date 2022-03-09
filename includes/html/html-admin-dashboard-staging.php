@@ -3,41 +3,11 @@
         <?php echo esc_html( get_admin_page_title() ); ?>
     </h1>
 
-
-    <?php if ( !empty( $sez_error ) ): ?>
-        <div class="row" style="margin-top:20px">
-            <div class="col">
-                <p style='color:red;font-weight:bold'><?= $sez_error; ?></p>
-            </div>
-        </div>
-    <?php endif; ?>
-
-
-    <?php 
-        if ( false == $dump_exists ):
-    ?>
-            <div class="row">
-                <div class="col-6" style="margin: 25px 0 50px 0;padding:25px;border:3px solid red">
-                    <form method="post" action="">
-                        <h5>Additional Action Required:</h5>
-                        <p>We have no reference of your live site (<?= $live_site; ?>) stored on our servers. This must be done before any syncs can be made.</p>
-                        <input type="hidden" name="sez_store_reference" value="y" />
-                        <button type="submit" class="btn btn-success" style="width: 100%;max-width:250px">Store Reference</button>
-                    </form>
-                </div>
-            </div>
-    <?php endif; ?>
-
     <div class="row" style="margin: 25px 0">
         <div class="col-4">
             <p>Last Synced: December 8, 2021 10:22am</p>
             <button type="button" class="btn btn-success" v-on:click="start_sync" style="min-width:250px">
                 Sync Changes
-                <!-- <span v-if="sync.processing">
-                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    Syncing...
-                </span>
-                <span v-else>Sync Changes</span> -->
             </button>
         </div>
     </div>

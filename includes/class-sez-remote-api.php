@@ -21,7 +21,7 @@
 
         public static function create_license_key( $name, $email ){
             $response = wp_remote_post(
-                self::$endpoint . "license",
+                self::$endpoint . "/license",
                 array(
                     "body" => array(
                         "name" => $name,

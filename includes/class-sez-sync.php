@@ -54,10 +54,10 @@
                 array(
                     array( "action" => "validate", "job_id" => $job_id ),
                     array( "action" => "check_for_existing_dump", "job_id" => $job_id ),
-                    array( "action" => "get_live_site_data", "job_id" => $job_id ),
                 ),
                 // Queue 3
                 array(
+                    array( "action" => "get_live_site_data", "job_id" => $job_id ),
                     array( "action" => "export_live_site", "job_id" => $job_id )
                 ),
                 // Queue 4
@@ -69,8 +69,12 @@
                     array( "action" => "replace_existing_dump", "job_id" => $job_id ),
                     array( "action" => "save_changes_to_db", "job_id" => $job_id )
                 ),
+                // Queue 6
                 array(
                     array( "action" => "perform_changes", "job_id" => $job_id ),
+                ),
+                // Queue 7
+                array(
                     array( "action" => "perform_adjustments", "job_id" => $job_id ),
                     array( "action" => "done", "job_id" => $job_id )
                 )
