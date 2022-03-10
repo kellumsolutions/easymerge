@@ -209,7 +209,7 @@
                 }
 
                 $props = array(
-                    "license_key" => $license_key,
+                    "license" => $license_key,
                     "live_site" => sez_clean_domain( site_url() )
                 );
                 SEZ_Settings::save_props( $props );
@@ -217,7 +217,7 @@
             
             } elseif ( isset( $_POST[ "register_dev_site" ] ) ){
                 $settings = SEZ_Settings::get();
-                $license_key = $settings[ "license_key" ];
+                $license_key = $settings[ "license" ];
                 $live_site = $settings[ "live_site" ];
                 $args = array(
                     "ezs_live_site" => $live_site,
