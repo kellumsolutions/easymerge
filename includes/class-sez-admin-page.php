@@ -57,44 +57,22 @@
                 SEZ_Rules::enable_rules( $rules_to_enable );
             }
 
-            /**
-             * Live Site:
-             *      - needs to be set if license or live site does not exist.
-             *      - is live site if "" and current domain matches lives site.
-             * 
-             * 
-             * Dev Site:
-             *      - needs to be set if license, live site is set. 
-             *        and current site domain is different than live site
-             *        and dev site is not set.
-             * 
-             *      - is dev site if all above is true and dev site is set.
-             */
-
-            $sez_settings = get_option( 'sez_site_settings' );
-            // $sez_settings = array(
-            //     "site_type" => "staging",
-            //     "license" => "6227a35665913",
-            //     // "live_site" => "localhost/sample-store",
-            //     "live_site" => "https://bojangles.com",
-            //     // "dev_site" => "localhosts/sample-store"
-            // );
-
-            if ( !isset( $sez_settings[ "license" ] ) || !isset( $sez_settings[ "live_site" ] ) ){
+            if ( empty( SEZ()->settings->live_site ) || empty( SEZ()->settings->license ) ){
                 require_once SEZ_ABSPATH . "includes/html/html-admin-dashboard-setup-live.php";
             
-            } elseif ( sez_clean_domain( site_url() ) === sez_clean_domain( $sez_settings[ "live_site" ] ) ) {
+            } elseif ( sez_clean_domain( site_url() ) === sez_clean_domain( SEZ()->settings->live_site ) ) {
                 // Delete dev_site from site_options.
                 // In case this is a restore from a dev site.
-                $license_key = $sez_settings[ "license" ];
+                SEZ()->settings->dev_site = "";
+                $license_key = SEZ()->settings->license;
                 require_once SEZ_ABSPATH . "includes/html/html-admin-dashboard-live.php";
             
-            } elseif ( !isset( $sez_settings[ "dev_site" ] ) ){
-                $license_key = $sez_settings[ "license" ];
-                $live_site = $sez_settings[ "live_site" ];
+            } elseif ( empty( SEZ()->settings->dev_site ) ){
+                $license_key = SEZ()->settings->license;
+                $live_site = SEZ()->settings->live_site;
                 require_once SEZ_ABSPATH . "includes/html/html-admin-dashboard-setup-dev.php";
 
-            } elseif ( sez_clean_domain( site_url() ) === sez_clean_domain( $sez_settings[ "dev_site" ] ) ) {
+            } elseif ( sez_clean_domain( site_url() ) === sez_clean_domain( SEZ()->settings->dev_site ) ) {
                 require_once SEZ_ABSPATH . "includes/html/html-admin-dashboard-staging.php";
             
             } else {
@@ -208,17 +186,13 @@
                     return wp_send_json_error( $response );
                 }
 
-                $props = array(
-                    "license" => $license_key,
-                    "live_site" => sez_clean_domain( site_url() )
-                );
-                SEZ_Settings::save_props( $props );
+                SEZ()->settings->license = $license_key;
+                SEZ()->settings->live_site = site_url();
                 return wp_send_json_success( true );
             
             } elseif ( isset( $_POST[ "register_dev_site" ] ) ){
-                $settings = SEZ_Settings::get();
-                $license_key = $settings[ "license" ];
-                $live_site = $settings[ "live_site" ];
+                $license_key = SEZ()->settings->license;
+                $live_site = SEZ()->settings->live_site;
                 $args = array(
                     "ezs_live_site" => $live_site,
                     "ezs_staging_site" => site_url(),
@@ -249,13 +223,11 @@
                     return wp_send_json_error( $response );
                 }
                 
-                SEZ_Settings::save_props( array( "dev_site" => site_url() ) );
+                SEZ()->settings->dev_site = site_url();
                 return wp_send_json_success( true );
             
             } elseif ( isset( $_POST[ "reset_dev_site" ] ) ){
-                $settings = SEZ_Settings::get();
-                unset( $settings[ "dev_site" ] );
-                SEZ_Settings::save( $settings );
+                SEZ()->settings->dev_site = "";
             }
         }
 

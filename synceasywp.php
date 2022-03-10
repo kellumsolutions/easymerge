@@ -9,6 +9,7 @@
  * TODO: 
  * 	- Add filter function to rules conditions, so data can be imported based on a 
  *	 user defined function.
+ *	- Show warning when uploads folder is not writable.
  */
  
 

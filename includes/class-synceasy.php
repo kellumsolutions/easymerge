@@ -71,6 +71,7 @@
 
         function on_init(){
             $this->sync = new SEZ_Sync();
+            $this->settings = SEZ_Settings::instance();
         }
 
 
