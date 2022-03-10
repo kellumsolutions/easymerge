@@ -72,13 +72,13 @@
              */
 
             $sez_settings = get_option( 'sez_site_settings' );
-            $sez_settings = array(
-                "site_type" => "staging",
-                "license" => "6227a35665913",
-                // "live_site" => "localhost/sample-store",
-                "live_site" => "https://bojangles.com",
-                // "dev_site" => "localhosts/sample-store"
-            );
+            // $sez_settings = array(
+            //     "site_type" => "staging",
+            //     "license" => "6227a35665913",
+            //     // "live_site" => "localhost/sample-store",
+            //     "live_site" => "https://bojangles.com",
+            //     // "dev_site" => "localhosts/sample-store"
+            // );
 
             if ( !isset( $sez_settings[ "license" ] ) || !isset( $sez_settings[ "live_site" ] ) ){
                 require_once SEZ_ABSPATH . "includes/html/html-admin-dashboard-setup-live.php";
