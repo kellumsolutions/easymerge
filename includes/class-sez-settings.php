@@ -18,8 +18,6 @@
             // Try to load data from json file.
             $file = trailingslashit( wp_upload_dir()[ "basedir" ] ) . $this->file_name;
             $this->load( $file );
-
-            add_action( 'shutdown', array( $this, 'save' ) );
         }
 
 

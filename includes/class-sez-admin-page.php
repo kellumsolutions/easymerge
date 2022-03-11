@@ -64,6 +64,7 @@
                 // Delete dev_site from site_options.
                 // In case this is a restore from a dev site.
                 SEZ()->settings->dev_site = "";
+                SEZ()->settings->save();
                 $license_key = SEZ()->settings->license;
                 require_once SEZ_ABSPATH . "includes/html/html-admin-dashboard-live.php";
             
@@ -188,6 +189,7 @@
 
                 SEZ()->settings->license = $license_key;
                 SEZ()->settings->live_site = site_url();
+                SEZ()->settings->save();
                 return wp_send_json_success( true );
             
             } elseif ( isset( $_POST[ "register_dev_site" ] ) ){
@@ -224,10 +226,12 @@
                 }
                 
                 SEZ()->settings->dev_site = site_url();
+                SEZ()->settings->save();
                 return wp_send_json_success( true );
             
             } elseif ( isset( $_POST[ "reset_dev_site" ] ) ){
                 SEZ()->settings->dev_site = "";
+                SEZ()->settings->save();
             }
         }
 

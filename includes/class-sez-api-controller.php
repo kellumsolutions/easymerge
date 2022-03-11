@@ -46,9 +46,10 @@
             $license_key = $_POST[ "license_key" ];
 
             // Validate license key.
-            $sez_settings = get_option( 'sez_site_settings' );
+//             $sez_settings = get_option( 'sez_site_settings' );
             
-            if ( empty( $sez_settings ) || !isset( $sez_settings[ "license"] ) || $sez_settings[ "license"] !== $license_key ){
+            if ( $license_key !== SEZ()->settings->license ){
+//             if ( empty( $sez_settings ) || !isset( $sez_settings[ "license"] ) || $sez_settings[ "license"] !== $license_key ){
                 $err = new WP_Error( "export_db_error", "Invalid license key." );
                 return rest_ensure_response( $err );
             } 
