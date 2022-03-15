@@ -206,23 +206,21 @@
                 if ( is_wp_error( $url ) ){
                     return wp_send_json_error( $url );
                 }
-
-                $response = SEZ_Remote_Api::create_dump( $license_key, $live_site, site_url(), $url );
-                $response = new SEZ_Api_Response( $response );
-                $response = $response->extract();
-
-                if ( is_wp_error( $response ) ){
-                    return wp_send_json_error( $response );
-                }
-
-                if ( false == $response->uploaded ){
-                    return wp_send_json_error( new WP_Error( "admin_actions_error", "There was an error creating the live site dump." ) );
-                }
                     
                 // Create dev site registration.
                 $response = SEZ_Remote_Api::create_new_registration( $args ); 
                 if ( is_wp_error( $response ) ){
                     return wp_send_json_error( $response );
+                }
+
+                $uploaded = SEZ_Remote_Api::create_dump( $license_key, $live_site, site_url(), $url );
+
+                if ( is_wp_error( $uploaded ) ){
+                    return wp_send_json_error( $uploaded );
+                }
+
+                if ( false == $uploaded ){
+                    return wp_send_json_error( new WP_Error( "admin_actions_error", "There was an error creating the live site dump." ) );
                 }
                 
                 SEZ()->settings->dev_site = site_url();
@@ -234,23 +232,6 @@
                 SEZ()->settings->save();
             }
         }
-
-
-        // private static function store_reference( $license_key, $live_domain, $staging_domain ){
-        //     $url = SEZ_Sync_Functions::export_site_db( $live_domain, $license_key );
-        //     if ( is_wp_error( $url ) ){
-        //         return $url;
-        //     }
-
-        //     $response = SEZ_Remote_Api::create_dump( $license_key, $live_domain, $staging_domain, $url );
-        //     $response = new SEZ_Api_Response( $response );
-        //     $response = $response->extract();
-
-        //     if ( is_wp_error( $response ) ){
-        //         return $response;
-        //     }
-        //     return $response->uploaded;
-        // }
     }
 
     SyncEasy_Admin_Page::init();

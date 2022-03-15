@@ -61,14 +61,14 @@
                         </tr>
                         <tr>
                             <td><p>License Key:</p></td>
-                            <td><p><?= $license_key; ?></p></td>
+                            <td><p><?= SEZ()->settings->license; ?></p></td>
                         </tr>
                         <tr>
                             <td>
                                 <p>Live Site:</p>
                             </td>
                             <td>
-                                <p><?= isset( $sez_settings[ "live_site" ] ) ? $sez_settings[ "live_site" ] : "Unknown"; ?></p>
+                                <p><?= !empty( SEZ()->settings->live_site ) ? SEZ()->settings->live_site : "Unknown"; ?></p>
                             </td>
                         </tr>
                     </table>
