@@ -2,81 +2,22 @@
     <h1 style="position:relative">
         <?php echo esc_html( get_admin_page_title() ); ?>
     </h1>
-
-    <div class="row" style="margin: 25px 0">
-        <div class="col-4">
-            <p>Last Synced: December 8, 2021 10:22am</p>
-            <button type="button" class="btn btn-success" v-on:click="start_sync" style="min-width:250px">
-                Sync Changes
-            </button>
-        </div>
+    <br>
+    <div class="nav-tab-wrapper easysync-nav-tab-wrapper">
+        <a class="nav-tab nav-tab-active" id="easysync-nav-tab-merge" href="<?= admin_url( "tools.php?page=" . SyncEasy_Admin_Page::$handle . "#merge" ); ?>">Merge/Sync</a>
+        <a class="nav-tab" id="easysync-nav-tab-license" href="<?= admin_url( "tools.php?page=" . SyncEasy_Admin_Page::$handle . "#license" ); ?>">License</a>
+        <a class="nav-tab" id="easysync-nav-tab-settings" href="<?= admin_url( "tools.php?page=" . SyncEasy_Admin_Page::$handle . "#settings" ); ?>s">Settings</a>
+        <a class="nav-tab" id="easysync-nav-tab-advancedtools" href="<?= admin_url( "tools.php?page=" . SyncEasy_Admin_Page::$handle . "#advanced-tools" ); ?>">Advanced Tools</a>
     </div>
 
-    <div class="row">
-        <ul class="nav nav-tabs">
-            <li v-for="( tab, i ) in tabs" v-on:click="change_tab(i)" class="nav-item" style="margin-bottom:0">
-                <a class="nav-link" :class="{active: tab.active }" href="#">{{ tab.label }}</a>
-            </li>
-        </ul>
-        <div style="background:#ffffff;border: 1px solid #dee2e6;padding:20px">
-            <div v-if="selected_tab == 'rules'">
-                <form method="post" action="">
-                    <table class="table">
-                        <tr>
-                            <th>Rule</th>
-                            <th>Enabled</th>
-                        </tr>
-                        <tbody>
-                            <?php
-                                $rules = SEZ_Rules::get_rules( false );
-                                foreach ( $rules as $rule ):
-                            ?>
-                                    <tr>
-                                        <td>
-                                            <label for="<?= $rule[ 'id' ]; ?>">
-                                                <p style="margin: 0"><?= $rule[ "id" ]; ?></p>
-                                                <p class="text-secondary"><?= $rule[ "description" ]; ?></p>
-                                            </label>
-                                        </td>
-                                        <td>
-                                            <input type="checkbox" name="<?= $rule[ 'id' ]; ?>" id="<?= $rule[ 'id' ]; ?>" <?= $rule[ "enabled" ] ? "checked" : ""; ?> />
-                                        </td>
-                                    </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                    <input type="hidden" name="sez-edit-rules" value="y" />
-                    <button type="submit" class="btn btn-success" style="width: 100%;max-width:250px;margin-top:20px">Save Rules</button>
-                </form>
-            </div>
-            <div v-else-if="selected_tab == 'synced_changes'">
-                <p>synced changes...</p>
-            </div>
-            <div v-else-if="selected_tab == 'settings'">
-                <div>
-                    <table class="table">
-                        <tr>
-                            <td style="width:50%"></td>
-                            <td style="width:50%"></td>
-                        </tr>
-                        <tr>
-                            <td><p>License Key:</p></td>
-                            <td><p><?= SEZ()->settings->license; ?></p></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <p>Live Site:</p>
-                            </td>
-                            <td>
-                                <p><?= !empty( SEZ()->settings->live_site ) ? SEZ()->settings->live_site : "Unknown"; ?></p>
-                            </td>
-                        </tr>
-                    </table>
-                    <!-- <button class="btn btn-success" type="button">Save Settings</button> -->
-                </div>
-            </div>
-        </div>
+    <div class="easysync-nav-tab-content">
+        <?php require_once( __DIR__ . "/nav-tab-sections/html-merge-nav-tab-section.php" ); ?>
+        <?php require_once( __DIR__ . "/nav-tab-sections/html-license-nav-tab-section.php" ); ?>
+        <?php require_once( __DIR__ . "/nav-tab-sections/html-settings-nav-tab-section.php" ); ?>
+        <?php require_once( __DIR__ . "/nav-tab-sections/html-advanced-tools-nav-tab-section.php" ); ?>
     </div>
+    
+
 
     <!-- Sync modal -->
     <div id="sez_sync_modal" :class="{active: sync.show_console}" style="padding-top:100px">

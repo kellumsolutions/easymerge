@@ -2,6 +2,8 @@
 
     class SyncEasy_Admin_Page {
 
+        public static $handle = "easysync";
+
         public static function init(){
             add_action( 'admin_menu', array( __CLASS__, 'setup_admin_page' ) );
             add_action( 'admin_enqueue_scripts', array( __CLASS__, 'load_scripts' ) );
@@ -15,10 +17,10 @@
         public static function setup_admin_page(){
             add_submenu_page(
                 "tools.php",
-                "SyncEasy",
-                "SyncEasy",
+                "EasySync Database Merging",
+                "EasySync",
                 "manage_options",
-                "synceasy",
+                self::$handle,
                 array( __CLASS__, "output" )
             );
         }
@@ -27,16 +29,17 @@
         public static function load_scripts(){
             if ( function_exists( 'get_current_screen' ) ) {
                 $screen = get_current_screen();
-                if ( is_object( $screen ) && property_exists( $screen, 'id' ) && $screen->id === "tools_page_synceasy" ){
+                if ( is_object( $screen ) && property_exists( $screen, 'id' ) && $screen->id === "tools_page_" . self::$handle ){
                     wp_enqueue_script( 'sez-bootstrap-js', SEZ_ASSETS_URL . "js/bootstrap.bundle.min.js", array(), false, true );
                     wp_enqueue_style( 'sez-bootstrap-style', SEZ_ASSETS_URL . "css/bootstrap.min.css" );
                     wp_enqueue_style( 'sez-admin-style', SEZ_ASSETS_URL . "css/sez-admin-styles.css" );
-                    wp_enqueue_script( 'sez-vue', SEZ_ASSETS_URL . "js/dev-vue.js", array(), false, true );
-
-                    wp_enqueue_script( 'sez-admin-page-scripts', SEZ_ASSETS_URL . "js/sez-admin-page.js", array( 'jquery', 'sez-vue' ), false, true );
+                    // wp_enqueue_script( 'sez-vue', SEZ_ASSETS_URL . "js/dev-vue.js", array(), false, true );
+                    // wp_enqueue_script( 'sez-admin-page-scripts', SEZ_ASSETS_URL . "js/sez-admin-page.js", array( 'jquery', 'sez-vue' ), false, true );
                     
-                    $localize_obj = array();
-                    wp_localize_script( 'sez-admin-page-scripts', 'SEZ_VARS', $localize_obj );
+                    wp_enqueue_script( 'easysync-admin-common', SEZ_ASSETS_URL . "js/easysync-admin-common.js", array( 'jquery' ), false, true );
+
+                    // $localize_obj = array();
+                    // wp_localize_script( 'sez-admin-page-scripts', 'SEZ_VARS', $localize_obj );
                 }
             }
         }
@@ -103,10 +106,10 @@
                 return wp_send_json_error( new WP_Error( "get_sync_status_error", "Job id not provided." ) );
             }
             $job_id = $_POST[ "sez_job_id" ];
-            $log = SEZ()->sync->get_log_path( $job_id );
+            $log = SEZ()->sync->get_log( $job_id );
 
-            if ( !file_exists( $log ) ){
-                return wp_send_json_error( new WP_Error( "get_sync_status_error", "Log file {$log} does not exist." ) );
+            if ( is_wp_error( $log ) ){
+                return wp_send_json_error( $log );
             }
 
             $output = array();

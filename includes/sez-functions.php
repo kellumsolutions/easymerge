@@ -418,4 +418,68 @@
         }
     }
 
+
+    if ( !function_exists( 'sez_get_merge_log' ) ){
+        function sez_get_merge_log( $job_id ){
+            $log_path = SEZ_Merge_Log::get_path( $job_id );
+
+            if ( !file_exists( $log ) ){
+                return new WP_Error( "get_merge_log_error", "Log file {$log} does not exist." );
+            }
+
+            return new SEZ_Merge_Log( $job_id );
+        }
+    }
+    
+
+    if ( !function_exists( 'sez_get_last_job_data' ) ){
+        function sez_get_last_job_data(){
+            global $wpdb;
+
+            // Find latest job.
+            $job_data = $wpdb->get_results( "SELECT * FROM {$wpdb->ezsa_changes} ORDER BY ID DESC LIMIT 1 ", ARRAY_A );
+
+            if ( empty( $job_data ) ){
+                return false;
+            }
+
+            $job_id = $job_data[0][ "job_id" ];
+
+            // Fetch all changes from job.
+            $results = $wpdb->get_results( 
+                $wpdb->prepare( "SELECT * FROM {$wpdb->ezsa_changes} WHERE job_id = %s ORDER BY ID ASC", $job_id ),
+                ARRAY_A
+            );
+
+            if ( empty( $results ) ){
+                return new WP_Error( "get_last_job_data_error", "An error occurred fetching last job data." );
+            }
+
+            $merged_changes = 0;
+            $unmerged_changes = 0;
+
+            foreach ( $results as $result ){
+                if ( "1" === $result[ "synced" ] || 1 === $result[ "synced" ] ){
+                    $merged_changes++;
+                } else {
+                    $unmerged_changes++;
+                }
+            }
+
+            // Read merge log to determine if an error occurred.
+            $log = sez_get_merge_log( $job_id );
+            if ( is_wp_error( $log ) ){ return false; }
+
+            return array(
+                "start_time" => $log->get_start_time(),
+                "end_time" => $log->get_end_time(),
+                "duration" => $log->get_duration(),
+                "merged_changes" => $merged_changes,
+                "unmerged_changes" => $unmerged_changes,
+                "status" => $log->has_error() ? "Fail" : "Success",
+                "job_id" => $job_id
+            );
+        }
+    }
+
 ?>

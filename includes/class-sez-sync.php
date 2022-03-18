@@ -93,7 +93,9 @@
             }
 
             //$action = $item[ "action" ];
-            $log = $this->get_job_param( $job_id, "log", "" );
+            // $log = $this->get_job_param( $job_id, "log", "" );
+            $log = sez_get_merge_log( $job_id );
+            // $log = is_wp_error( $log ) ? false : $log;
 
             $result = call_user_func_array( 
                 array( "SEZ_Sync_Functions", $item[ "action" ] ),
@@ -140,51 +142,23 @@
             $job_id = $prefix . $unique;
             
             if ( $create_log ){
-                $log = $this->create_log( $job_id );
+                $log = SEZ_Merge_Log::create( $job_id );
 
                 if ( is_wp_error( $log ) ){
                     return $log;
                 }
-            } else {
-                $log = "blank";
-            }
+            } 
+            // else {
+            //     $log = "blank";
+            // }
             
             $jobdata = array( 
-                "log" => $log, 
+                // "log" => $log, 
                 "data" => array(), 
                 "started" => current_time( 'mysql' ) 
             );
             update_option( $job_id, $jobdata );
             return $job_id;
-        }
-
-
-        private function create_log( $job_id ){
-            $base = trailingslashit( wp_upload_dir()[ "basedir" ] ) . "sez-logs";
-            if ( false === is_dir( $base ) ){
-                if ( false === mkdir( $base ) ){
-                    return new WP_Error( "sez_create_log_error", "Unable to create {$base} directory. Permissions issue." );
-                }
-            }
-            
-            $log = trailingslashit( $base ) . $job_id . ".log";
-            if ( file_exists( $log ) ){
-                if ( false === unlink( $log ) ){
-                    return new WP_Error( "sync_create_log_error", "Unable to delete existing log file {$log}. Permissions error." );
-                }
-            }
-
-            if ( false === file_put_contents( $log, "" ) ){
-                return  new WP_Error( "sync_create_log_error", "Unable to create log file. Permissions error." );
-            }
-            return $log;
-        }
-
-
-        public function get_log_path( $job_id ){
-            $base = trailingslashit( wp_upload_dir()[ "basedir" ] ) . "sez-logs";
-            $log = trailingslashit( $base ) . $job_id . ".log";
-            return $log;
         }
 
 
@@ -212,7 +186,13 @@
             $this->set_job_param( $job_id, "error", $message, "" );
 
             $jobdata = get_option( $job_id );
-            self::log( $jobdata[ "log" ], $message, "ERROR" );
+            // self::log( $jobdata[ "log" ], $message, "ERROR" );
+            $log = sez_get_merge_log( $job_id );
+            
+            if ( is_wp_error( $log ) ){
+                return;
+            }
+            $log->write( $message, "ERROR" );
         }
 
 
@@ -227,20 +207,26 @@
         }
 
 
-        public static function log( $file, $message, $type = "INFO" ){
+        public static function log( $log, $message, $type = "INFO" ){
+            if ( is_wp_error( $log ) ){
+                return;
+            }
             if ( $file === "blank" ){ return; }
+            
+            $log->write( $message, $type );
+            // if ( $file === "blank" ){ return; }
 
-            // Incorporate log levels.
-            if ( !isset( SEZ_LOG_LEVELS[ $type ] ) ){ return; }
+            // // Incorporate log levels.
+            // if ( !isset( SEZ_LOG_LEVELS[ $type ] ) ){ return; }
 
-            $level = SEZ_LOG_LEVELS[ $type ];
-            $app_level = SEZ_LOG_LEVELS[ SEZ_LOG_LEVEL ];
+            // $level = SEZ_LOG_LEVELS[ $type ];
+            // $app_level = SEZ_LOG_LEVELS[ SEZ_LOG_LEVEL ];
 
-            if ( $level > $app_level ){ return; }
+            // if ( $level > $app_level ){ return; }
 
-            $timestamp = current_time( 'mysql' );
-            $line = "{$timestamp} [{$type}] {$message}\n";
-            file_put_contents( $file, $line, FILE_APPEND );
+            // $timestamp = current_time( 'mysql' );
+            // $line = "{$timestamp} [{$type}] {$message}\n";
+            // file_put_contents( $file, $line, FILE_APPEND );
         }
     }
 
