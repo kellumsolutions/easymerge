@@ -12,6 +12,7 @@
 
         private $error = "";
 
+        private $console_output = "";
 
         public function __construct( $job_id ){
             $this->job_id = $job_id;
@@ -29,6 +30,7 @@
                 $handle = fopen( $file, "r" );
                 if ( $handle ) {
                     while ( ( $line = fgets( $handle ) ) !== false) {
+                        $is_error = false;
                         $timestamp = self::get_timestamp( $line );
                         if ( 0 === $line_num ){
                             $this->start_time = $timestamp;
@@ -37,10 +39,11 @@
                         }
 
                         // Search for error.
-                        if ( strpos( $line, "[ERROR]" ) !== false ){
+                        if ( false !== strpos( $line, "[ERROR]" ) ){
                             $components = explode( "[ERROR]", $line );
                             $this->error = trim( $components[ count( $components ) - 1 ] );
                         }
+                        $this->console_output .= $this->line_as_html( $line );
                         $line_num++;
                     }
                     fclose($handle);
@@ -108,6 +111,26 @@
             }
             $seconds = $delta % 60;
             return "{$minutes}m {$seconds}s";
+        }
+
+
+        public function get_console_output(){
+            return $this->console_output;
+        }
+
+
+        private function line_as_html( $line ){
+            $line = str_replace( "\n", "", $line );
+            
+            if ( false !== strpos( $line, "[ERROR]" ) ){
+                return "<p style='color:#ff4d4d'>{$line}</p>";
+
+            } elseif ( false !== strpos( $line, "[WARNING]" ) ){
+                return "<p style='color:#fff000'>{$line}</p>";
+
+            } else {
+                return "<p>{$line}</p>";
+            }
         }
 
 

@@ -423,8 +423,8 @@
         function sez_get_merge_log( $job_id ){
             $log_path = SEZ_Merge_Log::get_path( $job_id );
 
-            if ( !file_exists( $log ) ){
-                return new WP_Error( "get_merge_log_error", "Log file {$log} does not exist." );
+            if ( !file_exists( $log_path ) ){
+                return new WP_Error( "get_merge_log_error", "Log file {$log_path} does not exist." );
             }
 
             return new SEZ_Merge_Log( $job_id );
@@ -437,7 +437,7 @@
             global $wpdb;
 
             // Find latest job.
-            $job_data = $wpdb->get_results( "SELECT * FROM {$wpdb->ezsa_changes} ORDER BY ID DESC LIMIT 1 ", ARRAY_A );
+            $job_data = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}ezsa_changes ORDER BY ID DESC LIMIT 1 ", ARRAY_A );
 
             if ( empty( $job_data ) ){
                 return false;
@@ -447,7 +447,7 @@
 
             // Fetch all changes from job.
             $results = $wpdb->get_results( 
-                $wpdb->prepare( "SELECT * FROM {$wpdb->ezsa_changes} WHERE job_id = %s ORDER BY ID ASC", $job_id ),
+                $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}ezsa_changes WHERE job_id = %s ORDER BY ID ASC", $job_id ),
                 ARRAY_A
             );
 

@@ -18,33 +18,7 @@
     </div>
     
 
-
-    <!-- Sync modal -->
-    <div id="sez_sync_modal" :class="{active: sync.show_console}" style="padding-top:100px">
-        <img :class="{ 'sez-hidden': sync.processing }" id="sez_sync_modal_close_button" v-on:click="close_console" src="<?= SEZ_ASSETS_URL; ?>icons/3x/close-icon@3x.png" />
-        <div class="container" style="max-width:1000px">
-            <div class="row">
-                <div class="col-9">
-                    <div class="sez-topbar">
-                        <span class="sez-bubble"></span>
-                        <span class="sez-bubble"></span>
-                        <span class="sez-bubble"></span>
-                        <p class="sez-console-title">SyncEasy Console</p>
-                    </div>
-                    <div id="sez-blackbox">
-                        <div class="sez-blackbox-content">
-                            <p v-for="line in sync.output">{{ line }}</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-3">
-                    <div v-html="sync.additional_output"></div>
-                    <div :class="{ 'sez-active': sync.error, 'sez-hidden': !sync.error }">
-                        <h3 style="color:red"><b>Error</b></h3>
-                        <h5 style="color:red">{{ sync.error }}</h5>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <?php require_once( __DIR__ . "/modals/html-merge-modal.php" ); ?>
+    <?php require_once( __DIR__ . "/modals/html-merge-confirmation-modal.php" ); ?>
+    
 </div>

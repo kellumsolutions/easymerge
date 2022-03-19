@@ -38,8 +38,7 @@
                 }
                 $this->save(); // Saves new batch.
                 $this->data = array();
-            }
-            
+            }            
             $this->dispatch();
             return $job_id;
         }
@@ -53,29 +52,29 @@
                 // Queue 2
                 array(
                     array( "action" => "validate", "job_id" => $job_id ),
-                    array( "action" => "check_for_existing_dump", "job_id" => $job_id ),
+                    // array( "action" => "check_for_existing_dump", "job_id" => $job_id ),
                 ),
                 // Queue 3
+                // array(
+                //     array( "action" => "get_live_site_data", "job_id" => $job_id ),
+                //     array( "action" => "export_live_site", "job_id" => $job_id )
+                // ),
+                // // Queue 4
+                // array(
+                //     array( "action" => "fetch_changes", "job_id" => $job_id )
+                // ),
+                // // Queue 5
+                // array(
+                //     array( "action" => "replace_existing_dump", "job_id" => $job_id ),
+                //     array( "action" => "save_changes_to_db", "job_id" => $job_id )
+                // ),
+                // // Queue 6
+                // array(
+                //     array( "action" => "perform_changes", "job_id" => $job_id ),
+                // ),
+                // // Queue 7
                 array(
-                    array( "action" => "get_live_site_data", "job_id" => $job_id ),
-                    array( "action" => "export_live_site", "job_id" => $job_id )
-                ),
-                // Queue 4
-                array(
-                    array( "action" => "fetch_changes", "job_id" => $job_id )
-                ),
-                // Queue 5
-                array(
-                    array( "action" => "replace_existing_dump", "job_id" => $job_id ),
-                    array( "action" => "save_changes_to_db", "job_id" => $job_id )
-                ),
-                // Queue 6
-                array(
-                    array( "action" => "perform_changes", "job_id" => $job_id ),
-                ),
-                // Queue 7
-                array(
-                    array( "action" => "perform_adjustments", "job_id" => $job_id ),
+                    // array( "action" => "perform_adjustments", "job_id" => $job_id ),
                     array( "action" => "done", "job_id" => $job_id )
                 )
             );
@@ -83,7 +82,7 @@
 
 
         protected function task( $item ){
-            //file_put_contents( SEZ_ABSPATH . "/test.txt", json_encode( $item ) . "\n", FILE_APPEND );
+            // file_put_contents( SEZ_ABSPATH . "/test.txt", json_encode( $item ) . "\n", FILE_APPEND );
             $job_id = $item[ "job_id" ];
             $jobdata = get_option( $job_id );
 
@@ -211,22 +210,9 @@
             if ( is_wp_error( $log ) ){
                 return;
             }
-            if ( $file === "blank" ){ return; }
+            if ( $log === "blank" ){ return; }
             
             $log->write( $message, $type );
-            // if ( $file === "blank" ){ return; }
-
-            // // Incorporate log levels.
-            // if ( !isset( SEZ_LOG_LEVELS[ $type ] ) ){ return; }
-
-            // $level = SEZ_LOG_LEVELS[ $type ];
-            // $app_level = SEZ_LOG_LEVELS[ SEZ_LOG_LEVEL ];
-
-            // if ( $level > $app_level ){ return; }
-
-            // $timestamp = current_time( 'mysql' );
-            // $line = "{$timestamp} [{$type}] {$message}\n";
-            // file_put_contents( $file, $line, FILE_APPEND );
         }
     }
 

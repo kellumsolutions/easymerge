@@ -102,51 +102,56 @@
 
 
         public static function get_sync_status(){
+            $response = array(
+                "progress" => "", 
+                "output" => "",
+                "additional_output" => "",
+                "error" => array()
+            );
+            
             if ( !isset( $_POST[ "sez_job_id" ] ) ){
-                return wp_send_json_error( new WP_Error( "get_sync_status_error", "Job id not provided." ) );
+                $response[ "error" ] = array(
+                    "code" => "get_sync_status_error",
+                    "message" =>  "Job id not provided."
+                );
+                return wp_send_json_error( $response );
             }
+
             $job_id = $_POST[ "sez_job_id" ];
-            $log = SEZ()->sync->get_log( $job_id );
-
+            
+            $log = sez_get_merge_log( $job_id );
             if ( is_wp_error( $log ) ){
-                return wp_send_json_error( $log );
+                $response[ "error" ] = array(
+                    "code" => "get_sync_status_error",
+                    "message" =>  $log->get_error_message()
+                );
+                return wp_send_json_error( $response );
             }
 
-            $output = array();
+            $response[ "output" ] = $log->get_console_output();
 
-            $handle = fopen( $log, "r" );
-            if ( $handle ) {
-                while ( ( $line = fgets( $handle ) ) !== false) {
-                    $output[] = $line;
-                    
-                    // Search for error.
-                    if ( strpos( $line, "[ERROR]" ) !== false ){
-                        $components = explode( "[ERROR]", $line );
-                        $message = $components[ count( $components ) - 1 ];
-                        return wp_send_json_error( 
-                            new WP_Error( 
-                                "get_sync_status_error", 
-                                array( 
-                                    "err_message" => $message, 
-                                    "output" => $output 
-                                )
-                            )
-                        );
-                    }
-                }
-                fclose($handle);
-
-            } else {
-                // error opening the file.
-                return wp_send_json_error( new WP_Error( "get_sync_status_error", "Error reading log file {$log}." ) );
+            if ( $log->has_error() ){
+                $response[ "error" ] = array(
+                    "code" => "get_sync_status_error",
+                    "message" =>  $log->get_error()
+                );
+                return wp_send_json_error( $response );
             }
 
-            $job_still_exists = SEZ()->sync->get_job_param( $job_id, "log", "" );
+            $merge_complete = false === get_option( $job_id );
+            $response[ "progress" ] = $merge_complete ? "complete" : "ongoing";
+            
+            if ( $merge_complete ){
+                $path = SEZ_Merge_Log::get_path( $job_id );
+                $response[ "additional_output" ] .= "<h3>Merge Complete!</h3><p>The console output for this merge is saved at {$path}.</p>";
+            }
 
-            // Assume the process is done.
-            $status = $job_still_exists ? "ongoing" : "complete";
+            // $job_still_exists = SEZ()->sync->get_job_param( $job_id, "log", "" );
 
-            return wp_send_json_success( array( "output" => $output, "status" => $status ) );
+            // // Assume the process is done.
+            // $status = $job_still_exists ? "ongoing" : "complete";
+
+            return wp_send_json_success( $response );
         }
 
 

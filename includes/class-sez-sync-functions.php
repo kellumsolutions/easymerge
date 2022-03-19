@@ -4,31 +4,24 @@
         
 
         public static function start( $job_id, $log ){
+            $path = SEZ_Merge_Log::get_path( $job_id );
+
             SEZ_Sync::log( $log, "Starting sync." );
             SEZ_Sync::log( $log, "Job ID: {$job_id}." );
-            SEZ_Sync::log( $log, "A complete log of this sync can be found at {$log}." );
+            SEZ_Sync::log( $log, "A complete log of this sync can be found at {$path}." );
         }
 
 
         public static function validate( $job_id, $log ){
-            $sez_settings = get_option( 'sez_site_settings' );
-            $site_type = isset( $sez_settings[ "site_type" ] ) ? $sez_settings[ "site_type" ] : "blank"; 
-            $license_key = isset( $sez_settings[ "license" ] ) ? $sez_settings[ "license" ] : "";
-            $live_site = isset( $sez_settings[ "live_site" ] ) ? $sez_settings[ "live_site" ] : "blank";
-
-            SEZ_Sync::log( $log, "Site type: {$site_type}." );
+            $live_site = SEZ()->settings->live_site;
+            $license_key = SEZ()->settings->license;
+            
             SEZ_Sync::log( $log, "Live site: {$live_site}." );
             SEZ_Sync::log( $log, "License key: {$license_key}." );
             SEZ_Sync::log( $log, "Staging site (current site): " . site_url() );
 
-            if ( $site_type !== "staging" ){
-                return new WP_Error( "sync_changes_error", "Syncs can only be performed from a staging site." );
-            }
-
             SEZ_Sync::log( $log, "Site validation passed successfully. Site is now ready for processing." );
-            
             return array(
-                "site_type" => $site_type,
                 "live_site" => $live_site,
                 "license_key" => $license_key,
                 "staging_site" => site_url()

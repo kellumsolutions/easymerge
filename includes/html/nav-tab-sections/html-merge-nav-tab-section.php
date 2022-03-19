@@ -8,7 +8,7 @@
                 <p><span class="easysync-current-time-label">Current Time: </span><span class="easysync-current-time"></span></p>
             </div>
             <div class="col-4">
-                <button type="button" class="btn btn-primary btn-lg">Merge Now</button>
+                <button id="easysync-merge-now" type="button" class="btn btn-primary btn-lg">Merge Now</button>
             </div>  
         </div>
     </div>
