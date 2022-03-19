@@ -159,25 +159,12 @@ jQuery( document ).ready( function( $ ){
                         $( "#easysync-console-error" ).show();
                         easysync.stop_merge_status_polling();
                     }
-                    // if ( status == "success" && response.success ){
-                    //     self.sync.output = response.data.output;
-                    //     if ( response.data.status == "complete" ){
-                    //         easysync.stop_merge_status_polling();
-                    //         self.sync.additional_output = "<h3>Sync is done.</h3><p>Congratulations! Your sync is complete. The console output can also be found in the sync logs.</p>";    
-                    //     }
-                    //     return;
-                    // }
-                    // easysync.stop_merge_status_polling();
-                    // var message = "An error occurred. Please try again later.";
-                    
-                    
                 }
             )
             .fail( function( jqXHR, textStatus, errorThrown ){
                 console.log( jqXHR, textStatus, errorThrown );
                 console.log( "oops we got an error" );
                 easysync.stop_merge_status_polling();
-                // self.sync.error = "An unknown error occurred. Please try again later.";
             })
             .always( function(){
                 easysync.merge.processing = false;

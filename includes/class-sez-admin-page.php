@@ -9,7 +9,6 @@
             add_action( 'admin_enqueue_scripts', array( __CLASS__, 'load_scripts' ) );
             add_action( 'wp_ajax_sez_sync_changes', array( __CLASS__, 'sync_changes' ) );
             add_action( 'wp_ajax_sez_sync_get_status', array( __CLASS__, 'get_sync_status' ) );
-            add_action( 'wp_ajax_sez_get_license_key', array( __CLASS__, 'get_license_key' ) );
             add_action( 'wp_ajax_sez_admin_actions', array( __CLASS__, 'do_admin_actions' ) );
         }
 
@@ -33,13 +32,7 @@
                     wp_enqueue_script( 'sez-bootstrap-js', SEZ_ASSETS_URL . "js/bootstrap.bundle.min.js", array(), false, true );
                     wp_enqueue_style( 'sez-bootstrap-style', SEZ_ASSETS_URL . "css/bootstrap.min.css" );
                     wp_enqueue_style( 'sez-admin-style', SEZ_ASSETS_URL . "css/sez-admin-styles.css" );
-                    // wp_enqueue_script( 'sez-vue', SEZ_ASSETS_URL . "js/dev-vue.js", array(), false, true );
-                    // wp_enqueue_script( 'sez-admin-page-scripts', SEZ_ASSETS_URL . "js/sez-admin-page.js", array( 'jquery', 'sez-vue' ), false, true );
-                    
                     wp_enqueue_script( 'easysync-admin-common', SEZ_ASSETS_URL . "js/easysync-admin-common.js", array( 'jquery' ), false, true );
-
-                    // $localize_obj = array();
-                    // wp_localize_script( 'sez-admin-page-scripts', 'SEZ_VARS', $localize_obj );
                 }
             }
         }
@@ -146,24 +139,6 @@
                 $response[ "additional_output" ] .= "<h3>Merge Complete!</h3><p>The console output for this merge is saved at {$path}.</p>";
             }
 
-            // $job_still_exists = SEZ()->sync->get_job_param( $job_id, "log", "" );
-
-            // // Assume the process is done.
-            // $status = $job_still_exists ? "ongoing" : "complete";
-
-            return wp_send_json_success( $response );
-        }
-
-
-        public static function get_license_key(){
-            $name = isset( $_POST[ "ezs_name" ] ) ? $_POST[ "ezs_name" ] : "";
-            $email = isset( $_POST[ "ezs_email" ] ) ? $_POST[ "ezs_email" ] : "";
-
-            $response = SEZ_Remote_Api::create_license_key( $name, $email );
-            
-            if ( is_wp_error( $response ) ){
-                return wp_send_json_error( $response );
-            }
             return wp_send_json_success( $response );
         }
 

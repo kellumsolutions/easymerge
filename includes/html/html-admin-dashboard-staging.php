@@ -2,7 +2,10 @@
     <h1 style="position:relative">
         <?php echo esc_html( get_admin_page_title() ); ?>
     </h1>
-    <br>
+
+    <?php require_once( __DIR__ . "/html-admin-site-details.php" ); ?>
+
+    <!-- <br> -->
     <div class="nav-tab-wrapper easysync-nav-tab-wrapper">
         <a class="nav-tab nav-tab-active" id="easysync-nav-tab-merge" href="<?= admin_url( "tools.php?page=" . SyncEasy_Admin_Page::$handle . "#merge" ); ?>">Merge/Sync</a>
         <a class="nav-tab" id="easysync-nav-tab-license" href="<?= admin_url( "tools.php?page=" . SyncEasy_Admin_Page::$handle . "#license" ); ?>">License</a>
