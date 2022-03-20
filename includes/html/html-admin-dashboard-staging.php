@@ -5,7 +5,6 @@
 
     <?php require_once( __DIR__ . "/html-admin-site-details.php" ); ?>
 
-    <!-- <br> -->
     <div class="nav-tab-wrapper easysync-nav-tab-wrapper">
         <a class="nav-tab nav-tab-active" id="easysync-nav-tab-merge" href="<?= admin_url( "tools.php?page=" . SyncEasy_Admin_Page::$handle . "#merge" ); ?>">Merge/Sync</a>
         <a class="nav-tab" id="easysync-nav-tab-license" href="<?= admin_url( "tools.php?page=" . SyncEasy_Admin_Page::$handle . "#license" ); ?>">License</a>
@@ -20,8 +19,9 @@
         <?php require_once( __DIR__ . "/nav-tab-sections/html-advanced-tools-nav-tab-section.php" ); ?>
     </div>
     
-
+    <!-- Include modals. -->
     <?php require_once( __DIR__ . "/modals/html-merge-modal.php" ); ?>
     <?php require_once( __DIR__ . "/modals/html-merge-confirmation-modal.php" ); ?>
     <?php require_once( __DIR__ . "/modals/html-last-merge-log-modal.php" ); ?>
+    <?php require_once( __DIR__ . "/modals/html-last-merge-changes-modal.php" ); ?>
 </div>

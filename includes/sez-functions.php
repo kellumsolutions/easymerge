@@ -555,4 +555,43 @@
         }
     }
 
+
+    if ( !function_exists( 'sez_fetch_changes' ) ){
+        function sez_fetch_changes( $job_id, $merged = true ){
+            global $wpdb;
+
+            $synced = $merged ? 1 : 0;
+            $results = $wpdb->get_results( 
+                $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}sez_changes WHERE job_id = %s AND synced = %d ORDER BY ID ASC", $job_id, $synced ),
+                ARRAY_A
+            );
+            if ( empty( $results ) ){
+                return array();
+            }
+
+            $output = array();
+
+            foreach ( $results as $result ){
+                $change = SEZ_Change::db_init( $result );
+                if ( is_wp_error( $change ) ){ continue; }
+                $output[] = $change->get_label();
+            }
+            return $output;
+        }
+    }
+
+
+    if ( !function_exists( 'sez_fetch_merged_changes' ) ){
+        function sez_fetch_merged_changes( $job_id ){
+            return sez_fetch_changes( $job_id, true );
+        }
+    }
+
+
+    if ( !function_exists( 'sez_fetch_unmerged_changes' ) ){
+        function sez_fetch_unmerged_changes( $job_id ){
+            return sez_fetch_changes( $job_id, false );
+        }
+    }
+
 ?>

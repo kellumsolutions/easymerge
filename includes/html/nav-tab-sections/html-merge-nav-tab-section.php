@@ -15,7 +15,7 @@
     
     <br>
     <h5>Last Merge</h5>
-    <div class="easysync-content-wrapper postbox">
+    <div id="easysync-last-merge-section" class="easysync-content-wrapper postbox">
         <div class="row">
             <?php
                     $last_merge = sez_get_last_job_data();

@@ -18,15 +18,18 @@ jQuery( document ).ready( function( $ ){
     var easysync = {
         $nav_tab_wrapper: $( ".easysync-nav-tab-wrapper" ),
         $rules_form: $( "#easysync-merge-rules-form" ),
+        $last_merge_section: $( "#easysync-last-merge-section" ),
         modals: {
             $merge_confirmation: $( "#easysync-confimation-modal" ),
             $merge_console: $( "#sez_sync_modal" ),
-            $last_merge_log: $( "#easysync-last-merge-log-modal" )
+            $last_merge_log: $( "#easysync-last-merge-log-modal" ),
+            $last_merge_changes: $( "#easysync-last-merge-changes-modal" )
         },
         merge: {
             processing: false,
             job_id: "",
             interval: false,
+            successful: false
         },
         init: function(){
             this.$nav_tab_wrapper.on( "click", ".nav-tab", this.on_nav_tab_click );
@@ -34,7 +37,10 @@ jQuery( document ).ready( function( $ ){
             $( "#easysync-merge-now" ).on( "click", this.on_merge_now );
             $( "#easysync-merge-confirmation-start-merge" ).on( "click", this.on_merge_now_confirmed );
             this.modals.$merge_console.on( "click", "#sez_sync_modal_close_button", this.on_close_merge_console );
-            $( "#easysync-view-last-merge-log" ).on( "click", this.on_view_last_merge_log );
+            // $( "#easysync-view-last-merge-log" ).on( "click", this.on_view_last_merge_log );
+            // $( "#easysync-view-merged-details" ).on( "click", this.on_show_last_merged_changes );
+            this.$last_merge_section.on( "click", "#easysync-view-last-merge-log", this.on_view_last_merge_log );
+            this.$last_merge_section.on( "click", "#easysync-view-merged-details, #easysync-view-unmerged-details", this.on_show_last_merged_changes );
 
             // Triggers
             $( document.body ).on( "start_merge", this.start_merge );
@@ -187,6 +193,10 @@ jQuery( document ).ready( function( $ ){
         on_view_last_merge_log: function(){
             var modal = bootstrap.Modal.getOrCreateInstance( easysync.modals.$last_merge_log[0] );
             modal.show(); 
+        },
+        on_show_last_merged_changes: function(){
+            var modal = bootstrap.Modal.getOrCreateInstance( easysync.modals.$last_merge_changes[0] );
+            modal.show();  
         }
     };
     

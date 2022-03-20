@@ -8,7 +8,7 @@ body {
     width: 100%;
     top: 0;
     left: 0;
-    background: rgba( 255,255,255,0.8);
+    background: rgba( 255,255,255,0.95);
     z-index: 99999;
 }
 #sez_sync_modal.active {
