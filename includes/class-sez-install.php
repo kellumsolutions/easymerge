@@ -45,6 +45,17 @@
                 metadata LONGTEXT NOT NULL,
                 PRIMARY KEY (ID)
                 ) $collate;",
+
+                "CREATE TABLE {$wpdb->prefix}sez_jobs (
+                ID BIGINT(20) NOT NULL AUTO_INCREMENT,
+                job_id VARCHAR(100) NOT NULL DEFAULT '',
+                `status` VARCHAR(20) NOT NULL DEFAULT '',
+                has_error INT(2) NOT NULL DEFAULT '0',
+                started_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+                finished_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+                metadata LONGTEXT NOT NULL,
+                PRIMARY KEY (ID)
+                ) $collate;",
             );
         }
     }

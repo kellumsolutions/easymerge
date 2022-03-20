@@ -437,48 +437,108 @@
             global $wpdb;
 
             // Find latest job.
-            $job_data = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}ezsa_changes ORDER BY ID DESC LIMIT 1 ", ARRAY_A );
+            $jobdata = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}sez_jobs ORDER BY ID DESC LIMIT 1 ", ARRAY_A );
 
-            if ( empty( $job_data ) ){
+            if ( empty( $jobdata ) ){
                 return false;
             }
 
-            $job_id = $job_data[0][ "job_id" ];
+            $job_id = $jobdata[0][ "job_id" ];
 
             // Fetch all changes from job.
             $results = $wpdb->get_results( 
-                $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}ezsa_changes WHERE job_id = %s ORDER BY ID ASC", $job_id ),
+                $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}sez_changes WHERE job_id = %s ORDER BY ID ASC", $job_id ),
                 ARRAY_A
             );
 
-            if ( empty( $results ) ){
-                return new WP_Error( "get_last_job_data_error", "An error occurred fetching last job data." );
+            $merged_changes = "Could not find any merged changes.";
+            $unmerged_changes = "Could not find any unmerged changes.";
+
+            if ( !empty( $results ) ){
+                $merged_changes = 0;
+                $unmerged_changes = 0;
+                foreach ( $results as $result ){
+                    if ( "1" === $result[ "synced" ] || 1 === $result[ "synced" ] ){
+                        $merged_changes++;
+                    } else {
+                        $unmerged_changes++;
+                    }
+                }
+                $merged_changes = "{$merged_changes} merged changes. <span id='easysync-view-merged-details' class='easysync-hyperlink'>View details</span>";
+                $unmerged_changes = "{$unmerged_changes} unmerged changes. <span id='easysync-view-unmerged-details' class='easysync-hyperlink'>View details</span>";
             }
 
-            $merged_changes = 0;
-            $unmerged_changes = 0;
-
-            foreach ( $results as $result ){
-                if ( "1" === $result[ "synced" ] || 1 === $result[ "synced" ] ){
-                    $merged_changes++;
-                } else {
-                    $unmerged_changes++;
+            $error = "";
+            if ( 1 === (int)$jobdata[0][ "has_error" ] ){
+                $metadata = unserialize( $jobdata[0][ "metadata" ] );
+                if ( is_array( $metadata ) && isset( $metadata[ "error" ] ) ){
+                    $error = $metadata[ "error" ];
                 }
             }
 
-            // Read merge log to determine if an error occurred.
-            $log = sez_get_merge_log( $job_id );
-            if ( is_wp_error( $log ) ){ return false; }
+            $start_timestamp = strtotime( $jobdata[0][ "started_at" ] );
+            $end_timestamp = strtotime( $jobdata[0][ "finished_at" ] );
+            $duration = "";
+
+            if ( !empty( $start_timestamp ) && !empty( $end_timestamp ) ){
+                $delta = $end_timestamp - $start_timestamp;
+                if ( $delta <= 0 ){ return "0m 0s"; }
+
+                $minutes = 0;
+
+                if ( $delta > 59 ){
+                    $minutes = floor( $delta / 60 );
+                }
+                $seconds = $delta % 60;
+                $duration = "{$minutes}m {$seconds}s";
+            }
 
             return array(
-                "start_time" => $log->get_start_time(),
-                "end_time" => $log->get_end_time(),
-                "duration" => $log->get_duration(),
+                "start_time" => $jobdata[0][ "started_at" ],
+                "end_time" => $jobdata[0][ "finished_at" ],
+                "duration" => $duration,
+                "error" => $error,
                 "merged_changes" => $merged_changes,
                 "unmerged_changes" => $unmerged_changes,
-                "status" => $log->has_error() ? "Fail" : "Success",
+                "status" => $jobdata[0][ "status" ] === "fail" ? "<span style='color:red'>" . ucfirst( $jobdata[0][ "status" ] ) . "</span>" : ucfirst( $jobdata[0][ "status" ] ),
                 "job_id" => $job_id
             );
+        }
+    }
+
+
+    if ( !function_exists( 'sez_save_jobdata' ) ){
+        function sez_save_jobdata( $job_id ){
+            global $wpdb;
+
+            $jobdata = get_option( $job_id );
+
+            if ( empty( $jobdata ) ){
+                return new WP_Error( "sez_save_jobdata", "No jobdata." );
+            }
+
+            $error = isset( $jobdata[ "error" ] ) ? $jobdata[ "error" ] : "";
+            $has_error = !empty( $error );
+            $metadata = array();
+
+            if ( $has_error ){
+                $metadata[ "error" ] = $jobdata[ "error" ];
+            }
+            $result = $wpdb->insert(
+                $wpdb->prefix . "sez_jobs",
+                array(
+                    "job_id" => $job_id,
+                    "status" => $has_error ? "fail" : "success",
+                    "has_error" => $has_error ? 1 : 0,
+                    "started_at" => isset( $jobdata[ "start_time" ] ) ? $jobdata[ "start_time" ] : "",
+                    "finished_at" => current_time( 'mysql' ),
+                    "metadata" => serialize( $metadata )
+                )
+            );
+            if ( false == $result ){
+                return new WP_Error( "sez_save_jobdata", "Error saving jobdata." );
+            }
+            return $result;
         }
     }
 

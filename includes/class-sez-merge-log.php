@@ -6,11 +6,11 @@
 
         private $job_id = "";
 
-        private $start_time = "";
+        // private $start_time = "";
 
-        private $end_time = "";
+        // private $end_time = "";
 
-        private $error = "";
+        // private $error = "";
 
         private $console_output = "";
 
@@ -31,17 +31,17 @@
                 if ( $handle ) {
                     while ( ( $line = fgets( $handle ) ) !== false) {
                         $is_error = false;
-                        $timestamp = self::get_timestamp( $line );
-                        if ( 0 === $line_num ){
-                            $this->start_time = $timestamp;
-                        } else {
-                            $this->end_time = $timestamp;
-                        }
+                        // $timestamp = self::get_timestamp( $line );
+                        // if ( 0 === $line_num ){
+                        //     $this->start_time = $timestamp;
+                        // } else {
+                        //     $this->end_time = $timestamp;
+                        // }
 
                         // Search for error.
                         if ( false !== strpos( $line, "[ERROR]" ) ){
                             $components = explode( "[ERROR]", $line );
-                            $this->error = trim( $components[ count( $components ) - 1 ] );
+                            // $this->error = trim( $components[ count( $components ) - 1 ] );
                         }
                         $this->console_output .= $this->line_as_html( $line );
                         $line_num++;
@@ -74,44 +74,44 @@
         }
 
 
-        public function get_start_time(){
-            return $this->start_time;
-        }
+        // public function get_start_time(){
+        //     return $this->start_time;
+        // }
 
 
-        public function get_end_time(){
-            return $this->end_time;
-        }
+        // public function get_end_time(){
+        //     return $this->end_time;
+        // }
 
 
-        public function get_error(){
-            return $this->error;
-        }
+        // public function get_error(){
+        //     return $this->error;
+        // }
 
 
-        public function has_error(){
-            return !empty( $this->error );
-        }
+        // public function has_error(){
+        //     return !empty( $this->error );
+        // }
 
 
-        public function get_duration(){
-            $start_timestamp = strtotime( $this->start_time );
-            $end_timestamp = strtotime( $this->end_time );
+        // public function get_duration(){
+        //     $start_timestamp = strtotime( $this->start_time );
+        //     $end_timestamp = strtotime( $this->end_time );
 
-            if ( empty( $start_timestamp ) || empty( $end_timestamp ) ){
-                return "";
-            }
-            $delta = $end_timestamp - $start_timestamp;
-            if ( $delta <= 0 ){ return "0m 0s"; }
+        //     if ( empty( $start_timestamp ) || empty( $end_timestamp ) ){
+        //         return "";
+        //     }
+        //     $delta = $end_timestamp - $start_timestamp;
+        //     if ( $delta <= 0 ){ return "0m 0s"; }
 
-            $minutes = 0;
+        //     $minutes = 0;
 
-            if ( $delta > 59 ){
-                $minutes = floor( $delta / 60 );
-            }
-            $seconds = $delta % 60;
-            return "{$minutes}m {$seconds}s";
-        }
+        //     if ( $delta > 59 ){
+        //         $minutes = floor( $delta / 60 );
+        //     }
+        //     $seconds = $delta % 60;
+        //     return "{$minutes}m {$seconds}s";
+        // }
 
 
         public function get_console_output(){
@@ -134,12 +134,12 @@
         }
 
 
-        public static function get_timestamp( $line ){
-            $parts = explode( " ", $line, 3 );
-            if ( 3 === count( $parts ) ){
-                return $parts[0] . " " . $parts[1];
-            }
-        }
+        // public static function get_timestamp( $line ){
+        //     $parts = explode( " ", $line, 3 );
+        //     if ( 3 === count( $parts ) ){
+        //         return $parts[0] . " " . $parts[1];
+        //     }
+        // }
 
 
         public static function get_path( $job_id ){

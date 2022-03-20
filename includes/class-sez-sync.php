@@ -52,29 +52,29 @@
                 // Queue 2
                 array(
                     array( "action" => "validate", "job_id" => $job_id ),
-                    // array( "action" => "check_for_existing_dump", "job_id" => $job_id ),
+                    array( "action" => "check_for_existing_dump", "job_id" => $job_id ),
                 ),
                 // Queue 3
-                // array(
-                //     array( "action" => "get_live_site_data", "job_id" => $job_id ),
-                //     array( "action" => "export_live_site", "job_id" => $job_id )
-                // ),
-                // // Queue 4
-                // array(
-                //     array( "action" => "fetch_changes", "job_id" => $job_id )
-                // ),
-                // // Queue 5
-                // array(
-                //     array( "action" => "replace_existing_dump", "job_id" => $job_id ),
-                //     array( "action" => "save_changes_to_db", "job_id" => $job_id )
-                // ),
-                // // Queue 6
-                // array(
-                //     array( "action" => "perform_changes", "job_id" => $job_id ),
-                // ),
+                array(
+                    array( "action" => "get_live_site_data", "job_id" => $job_id ),
+                    array( "action" => "export_live_site", "job_id" => $job_id )
+                ),
+                // Queue 4
+                array(
+                    array( "action" => "fetch_changes", "job_id" => $job_id )
+                ),
+                // Queue 5
+                array(
+                    array( "action" => "replace_existing_dump", "job_id" => $job_id ),
+                    array( "action" => "save_changes_to_db", "job_id" => $job_id )
+                ),
+                // Queue 6
+                array(
+                    array( "action" => "perform_changes", "job_id" => $job_id ),
+                ),
                 // // Queue 7
                 array(
-                    // array( "action" => "perform_adjustments", "job_id" => $job_id ),
+                    array( "action" => "perform_adjustments", "job_id" => $job_id ),
                     array( "action" => "done", "job_id" => $job_id )
                 )
             );
@@ -84,17 +84,14 @@
         protected function task( $item ){
             // file_put_contents( SEZ_ABSPATH . "/test.txt", json_encode( $item ) . "\n", FILE_APPEND );
             $job_id = $item[ "job_id" ];
-            $jobdata = get_option( $job_id );
-
+            // $jobdata = get_option( $job_id );
+            // file_put_contents( SEZ_ABSPATH . "/test.txt", json_encode( $jobdata ) . "\n", FILE_APPEND );
             // When an error exists, no other processes run.
             if ( !empty( $this->get_job_param( $job_id, "error", "" ) ) ){
                 return false;
             }
 
-            //$action = $item[ "action" ];
-            // $log = $this->get_job_param( $job_id, "log", "" );
             $log = sez_get_merge_log( $job_id );
-            // $log = is_wp_error( $log ) ? false : $log;
 
             $result = call_user_func_array( 
                 array( "SEZ_Sync_Functions", $item[ "action" ] ),
@@ -120,13 +117,23 @@
             global $wpdb;
 
             parent::complete();
-
-            // Delete job data.
+    
             $results = $wpdb->get_results( 
-                "SELECT * FROM {$wpdb->options} WHERE option_name LIKE 'sez-sync-job%'", 
+                "SELECT * FROM {$wpdb->options} WHERE option_name LIKE 'sez-sync-job%' ORDER BY option_name DESC", 
                 ARRAY_A 
             );
             if ( !empty( $results ) ){
+
+                // Save job data in db.
+                $job_id = $results[0][ "option_name" ];
+                // file_put_contents( SEZ_ABSPATH . "/test.txt", json_encode( $results[0][ "option_name" ] ) . "\n", FILE_APPEND );
+
+                if ( is_wp_error( $result = sez_save_jobdata( $job_id ) ) ){
+                    // Maybe do some kind of indication?
+                    // file_put_contents( SEZ_ABSPATH . "/test.txt", json_encode( $result ) . "\n", FILE_APPEND );
+                }
+
+                // Delete job data.
                 foreach ( $results as $option ){
                     $option_name = $option[ "option_name" ];
                     delete_option( $option_name );
@@ -154,19 +161,20 @@
             $jobdata = array( 
                 // "log" => $log, 
                 "data" => array(), 
-                "started" => current_time( 'mysql' ) 
+                "start_time" => current_time( 'mysql' ) 
             );
             update_option( $job_id, $jobdata );
             return $job_id;
         }
 
 
-        public function set_job_param( $job_id, $param, $value, $context = "data" ){
+        public function set_job_param( $job_id, $key, $value, $context = "data" ){
             $jobdata = get_option( $job_id );
             if ( empty( $context ) ){
-                $jobdata[ $param ] = $value; 
+                $jobdata[ $key ] = $value; 
+            } else {
+                $jobdata[ $context ][ $key ] = $value;
             }
-            $jobdata[ $context ][ $param ] = $value;
             update_option( $job_id, $jobdata );
         }
 
@@ -185,7 +193,6 @@
             $this->set_job_param( $job_id, "error", $message, "" );
 
             $jobdata = get_option( $job_id );
-            // self::log( $jobdata[ "log" ], $message, "ERROR" );
             $log = sez_get_merge_log( $job_id );
             
             if ( is_wp_error( $log ) ){

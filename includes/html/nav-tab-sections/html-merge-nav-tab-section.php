@@ -31,9 +31,19 @@
             <?php    else: ?>
                         <div class="col-8">
                             <p>Status: <strong><?= $last_merge[ "status" ]; ?></strong></p>
-                            <p><?= $last_merge[ "merged_changes" ]; ?> merged changes. <span class="easysync-hyperlink">View details</span></p>
-                            <p><?= $last_merge[ "unmerged_changes" ]; ?> database changes were unable to be merged. <span class="easysync-hyperlink">View details</span></p>
-                            <p><span class="easysync-hyperlink">View Merge Log</span></p>
+                            <?php if ( !empty( $last_merge[ "error" ] ) ): ?>
+                                <p style="color:red"><strong>ERROR: <?= $last_merge[ "error" ]; ?></strong></p>
+                            <?php endif; ?>
+                            <p><?= $last_merge[ "merged_changes" ]; ?></p>
+                            <p><?= $last_merge[ "unmerged_changes" ]; ?></p>
+                            <?php
+                                $job_id = $last_merge[ "job_id" ];
+                                $log_path = SEZ_Merge_Log::get_path( $job_id );
+                                if ( file_exists( $log_path ) ){
+                                    echo "<p><span data-job-id='{$job_id}' id='easysync-view-merge-log' class='easysync-hyperlink'>View Merge Log</span></p>";
+                                }
+                            ?>
+                            
                         </div>
                         <div class="col-4" style="text-align:right">
                             <p>Job ID: <?= $last_merge[ "job_id" ]; ?></p>

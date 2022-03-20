@@ -67,6 +67,45 @@ class Test_SEZ_Functions extends WP_UnitTestCase {
     }
 
 
+    function test_save_jobdata(){
+        global $wpdb;
+
+        SEZ_Install::install();
+
+        $job_id = "1234";
+        $data = array(
+            "start_time" => "2020-02-23 13:17:00"
+        );
+        update_option( $job_id, $data );
+        
+        $result = sez_save_jobdata( $job_id );
+        $this->assertTrue( true === $result );
+
+        $result = $wpdb->get_results( "select * from {$wpdb->prefix}sez_jobs where job_id = '{$job_id}'", ARRAY_A );
+        $this->assertTrue( "success" === $result[0][ "status" ] );
+        $this->assertTrue( "0" === $result[0][ "has_error" ] );
+        $this->assertTrue( "2020-02-23 13:17:00" === $result[0][ "started_at" ] );
+        $this->assertTrue( serialize( array() ) === $result[0][ "metadata" ] );
+
+        // Test with error.
+        $job_id = "5678";
+        $data = array(
+            "start_time" => "2020-02-23 13:17:00",
+            "error" => "Just a test error"
+        );
+        update_option( $job_id, $data );
+        
+        $result = sez_save_jobdata( $job_id );
+        $this->assertTrue( true === $result );
+
+        $result = $wpdb->get_results( "select * from {$wpdb->prefix}sez_jobs where job_id = '{$job_id}'", ARRAY_A );
+        $this->assertTrue( "fail" === $result[0][ "status" ] );
+        $this->assertTrue( "1" === $result[0][ "has_error" ] );
+        $this->assertTrue( "2020-02-23 13:17:00" === $result[0][ "started_at" ] );
+        $this->assertTrue( serialize( array( "error" => "Just a test error" ) ) === $result[0][ "metadata" ] );
+    }
+
+
     function ezsa_rmdir( $dir ){
         if (is_dir( $dir ) ) { 
             $objects = scandir($dir);
