@@ -23,5 +23,5 @@
 
     <?php require_once( __DIR__ . "/modals/html-merge-modal.php" ); ?>
     <?php require_once( __DIR__ . "/modals/html-merge-confirmation-modal.php" ); ?>
-    
+    <?php require_once( __DIR__ . "/modals/html-last-merge-log-modal.php" ); ?>
 </div>

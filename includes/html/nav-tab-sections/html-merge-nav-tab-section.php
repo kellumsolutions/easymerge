@@ -40,7 +40,7 @@
                                 $job_id = $last_merge[ "job_id" ];
                                 $log_path = SEZ_Merge_Log::get_path( $job_id );
                                 if ( file_exists( $log_path ) ){
-                                    echo "<p><span data-job-id='{$job_id}' id='easysync-view-merge-log' class='easysync-hyperlink'>View Merge Log</span></p>";
+                                    echo "<p><span data-job-id='{$job_id}' id='easysync-view-last-merge-log' class='easysync-hyperlink'>View Merge Log</span></p>";
                                 }
                             ?>
                             

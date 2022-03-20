@@ -54,7 +54,8 @@ body {
     overflow-y: scroll;
     height: 100%;
 }
-#sez-blackbox > .sez-blackbox-content p {
+#sez-blackbox > .sez-blackbox-content p,
+.easysync-last-merge-log-blackbox p {
     color: #ffffff;
     margin: 3px 0;
 }
@@ -135,4 +136,16 @@ body {
 }
 .easysync-site-details > span > span {
     font-weight: bold;
+}
+#easysync-last-merge-log-modal > .modal-dialog {
+    max-width: 750px;
+}
+.easysync-last-merge-log-blackbox {
+    background: #1a1a1a;
+}
+.easysync-last-merge-log-blackbox-content {
+    max-height: 350px;
+    overflow-y: scroll;
+    padding: 20px;
+    background: #1a1a1a;
 }

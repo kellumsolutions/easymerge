@@ -432,18 +432,31 @@
     }
     
 
-    if ( !function_exists( 'sez_get_last_job_data' ) ){
-        function sez_get_last_job_data(){
+    if ( !function_exists( 'sez_get_last_merge_job' ) ){
+        function sez_get_last_merge_job(){
             global $wpdb;
-
-            // Find latest job.
             $jobdata = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}sez_jobs ORDER BY ID DESC LIMIT 1 ", ARRAY_A );
 
             if ( empty( $jobdata ) ){
                 return false;
             }
 
-            $job_id = $jobdata[0][ "job_id" ];
+            return $jobdata[0];
+        }    
+    }
+
+
+    if ( !function_exists( 'sez_get_last_job_data' ) ){
+        function sez_get_last_job_data(){
+            global $wpdb;
+
+            // Find latest job.
+            $jobdata = sez_get_last_merge_job();
+            if ( empty( $jobdata) ){
+                return false;
+            }
+
+            $job_id = $jobdata[ "job_id" ];
 
             // Fetch all changes from job.
             $results = $wpdb->get_results( 
@@ -469,15 +482,15 @@
             }
 
             $error = "";
-            if ( 1 === (int)$jobdata[0][ "has_error" ] ){
-                $metadata = unserialize( $jobdata[0][ "metadata" ] );
+            if ( 1 === (int)$jobdata[ "has_error" ] ){
+                $metadata = unserialize( $jobdata[ "metadata" ] );
                 if ( is_array( $metadata ) && isset( $metadata[ "error" ] ) ){
                     $error = $metadata[ "error" ];
                 }
             }
 
-            $start_timestamp = strtotime( $jobdata[0][ "started_at" ] );
-            $end_timestamp = strtotime( $jobdata[0][ "finished_at" ] );
+            $start_timestamp = strtotime( $jobdata[ "started_at" ] );
+            $end_timestamp = strtotime( $jobdata[ "finished_at" ] );
             $duration = "";
 
             if ( !empty( $start_timestamp ) && !empty( $end_timestamp ) ){
@@ -494,13 +507,13 @@
             }
 
             return array(
-                "start_time" => $jobdata[0][ "started_at" ],
-                "end_time" => $jobdata[0][ "finished_at" ],
+                "start_time" => $start_timestamp ? date( "D, M d, Y h:i:s a", $start_timestamp ) : "",
+                "end_time" => $end_timestamp ? date( "D, M d, Y h:i:s a", $end_timestamp ) : "",
                 "duration" => $duration,
                 "error" => $error,
                 "merged_changes" => $merged_changes,
                 "unmerged_changes" => $unmerged_changes,
-                "status" => $jobdata[0][ "status" ] === "fail" ? "<span style='color:red'>" . ucfirst( $jobdata[0][ "status" ] ) . "</span>" : ucfirst( $jobdata[0][ "status" ] ),
+                "status" => $jobdata[ "status" ] === "fail" ? "<span style='color:red'>" . ucfirst( $jobdata[ "status" ] ) . "</span>" : ucfirst( $jobdata[ "status" ] ),
                 "job_id" => $job_id
             );
         }

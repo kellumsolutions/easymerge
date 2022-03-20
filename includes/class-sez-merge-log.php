@@ -10,7 +10,7 @@
 
         // private $end_time = "";
 
-        // private $error = "";
+        private $error = "";
 
         private $console_output = "";
 
@@ -41,7 +41,7 @@
                         // Search for error.
                         if ( false !== strpos( $line, "[ERROR]" ) ){
                             $components = explode( "[ERROR]", $line );
-                            // $this->error = trim( $components[ count( $components ) - 1 ] );
+                            $this->error = trim( $components[ count( $components ) - 1 ] );
                         }
                         $this->console_output .= $this->line_as_html( $line );
                         $line_num++;
@@ -84,14 +84,14 @@
         // }
 
 
-        // public function get_error(){
-        //     return $this->error;
-        // }
+        public function get_error(){
+            return $this->error;
+        }
 
 
-        // public function has_error(){
-        //     return !empty( $this->error );
-        // }
+        public function has_error(){
+            return !empty( $this->error );
+        }
 
 
         // public function get_duration(){

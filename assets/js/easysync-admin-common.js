@@ -20,7 +20,8 @@ jQuery( document ).ready( function( $ ){
         $rules_form: $( "#easysync-merge-rules-form" ),
         modals: {
             $merge_confirmation: $( "#easysync-confimation-modal" ),
-            $merge_console: $( "#sez_sync_modal" )
+            $merge_console: $( "#sez_sync_modal" ),
+            $last_merge_log: $( "#easysync-last-merge-log-modal" )
         },
         merge: {
             processing: false,
@@ -33,7 +34,8 @@ jQuery( document ).ready( function( $ ){
             $( "#easysync-merge-now" ).on( "click", this.on_merge_now );
             $( "#easysync-merge-confirmation-start-merge" ).on( "click", this.on_merge_now_confirmed );
             this.modals.$merge_console.on( "click", "#sez_sync_modal_close_button", this.on_close_merge_console );
-            
+            $( "#easysync-view-last-merge-log" ).on( "click", this.on_view_last_merge_log );
+
             // Triggers
             $( document.body ).on( "start_merge", this.start_merge );
 
@@ -164,6 +166,9 @@ jQuery( document ).ready( function( $ ){
             .fail( function( jqXHR, textStatus, errorThrown ){
                 console.log( jqXHR, textStatus, errorThrown );
                 console.log( "oops we got an error" );
+                $( "#easysync-console-error h5" ).html( "An unknown error occurred. Please try again later." );
+                $( "#easysync-console-error" ).show();
+                $( "#easysync-console-additional-output" ).html( "" );
                 easysync.stop_merge_status_polling();
             })
             .always( function(){
@@ -178,6 +183,10 @@ jQuery( document ).ready( function( $ ){
             $( "#easysync-console-error" ).hide();
             $( "#easysync-console-additional-output" ).html( "" );
             $( "#sez-blackbox > .sez-blackbox-content" ).html( "" );
+        },
+        on_view_last_merge_log: function(){
+            var modal = bootstrap.Modal.getOrCreateInstance( easysync.modals.$last_merge_log[0] );
+            modal.show(); 
         }
     };
     
