@@ -10,6 +10,7 @@
             add_action( 'wp_ajax_sez_sync_changes', array( __CLASS__, 'sync_changes' ) );
             add_action( 'wp_ajax_sez_sync_get_status', array( __CLASS__, 'get_sync_status' ) );
             add_action( 'wp_ajax_sez_admin_actions', array( __CLASS__, 'do_admin_actions' ) );
+            add_action( 'wp_ajax_sez_save_settings', array( __CLASS__, 'save_settings' ) );
         }
 
 
@@ -214,6 +215,18 @@
                 SEZ()->settings->dev_site = "";
                 SEZ()->settings->save();
             }
+        }
+
+
+        public static function save_settings(){
+            SEZ()->settings->merge_log_level = $_POST[ "easysync-merge-log-level" ];
+            SEZ()->settings->auto_delete_logs = isset( $_POST[ "easysync-auto-delete-logs" ] );
+            SEZ()->auto_delete_change_files = isset( $_POST[ "easysync-auto-delete-change-files" ] );
+            
+            if ( is_wp_error( $result = SEZ()->settings->save() ) ){
+                wp_send_json_error( $result );
+            }
+            return wp_send_json( $_POST );
         }
     }
 

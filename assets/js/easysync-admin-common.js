@@ -13,12 +13,21 @@ Date.prototype.timeNow = function () {
     );
 }
 
+function is_wp_error( response ){
+    return "data" in response && Array.isArray( response.data ) && response.data.length > 0 && "code" in response.data[0] && "message" in response.data[0];
+}
+
+function wp_error_message( response ){
+    return response.data[0].message;
+}
+
 
 jQuery( document ).ready( function( $ ){
     var easysync = {
         $nav_tab_wrapper: $( ".easysync-nav-tab-wrapper" ),
         $rules_form: $( "#easysync-merge-rules-form" ),
         $last_merge_section: $( "#easysync-last-merge-section" ),
+        $settings_form: $( "#easysync-nav-tab-settings-content form" ),
         modals: {
             $merge_confirmation: $( "#easysync-confimation-modal" ),
             $merge_console: $( "#sez_sync_modal" ),
@@ -37,10 +46,9 @@ jQuery( document ).ready( function( $ ){
             $( "#easysync-merge-now" ).on( "click", this.on_merge_now );
             $( "#easysync-merge-confirmation-start-merge" ).on( "click", this.on_merge_now_confirmed );
             this.modals.$merge_console.on( "click", "#sez_sync_modal_close_button", this.on_close_merge_console );
-            // $( "#easysync-view-last-merge-log" ).on( "click", this.on_view_last_merge_log );
-            // $( "#easysync-view-merged-details" ).on( "click", this.on_show_last_merged_changes );
             this.$last_merge_section.on( "click", "#easysync-view-last-merge-log", this.on_view_last_merge_log );
             this.$last_merge_section.on( "click", "#easysync-view-merged-details, #easysync-view-unmerged-details", this.on_show_last_merged_changes );
+            this.$settings_form.on( "submit", this.on_save_settings );
 
             // Triggers
             $( document.body ).on( "start_merge", this.start_merge );
@@ -197,7 +205,34 @@ jQuery( document ).ready( function( $ ){
         on_show_last_merged_changes: function(){
             var modal = bootstrap.Modal.getOrCreateInstance( easysync.modals.$last_merge_changes[0] );
             modal.show();  
-        }
+        },
+        on_save_settings: function( e ){
+            e.preventDefault();
+            easysync.$settings_form.find( ".error" ).html( "" );
+            var submit_buton = easysync.$settings_form.find( "button[type=submit]" );
+            submit_buton.addClass( "processing" );
+
+            jQuery.post(
+                ajaxurl,
+                $( this ).serialize(),
+                function( response, status ){
+                    console.log( response, status );
+                    
+                    // WP error.
+                    if ( status == "success" && is_wp_error( response ) ){
+                        easysync.$settings_form.find( ".error" ).html( wp_error_message( response ) );
+                    }
+                }
+            )
+            .fail( function( jqXHR, textStatus, errorThrown ){
+                console.log( jqXHR, textStatus, errorThrown );
+                console.log( "oops we got an error" );
+                easysync.$settings_form.find( ".error" ).html( "An unknown error occurred. Please try again later." );
+            })
+            .always( function(){
+                submit_buton.removeClass( "processing" );
+            });            
+        },
     };
     
     easysync.init();
