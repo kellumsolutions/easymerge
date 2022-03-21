@@ -63,7 +63,9 @@
             if ( !isset( SEZ_LOG_LEVELS[ $type ] ) ){ return; }
 
             $level = SEZ_LOG_LEVELS[ $type ];
-            $app_level = SEZ_LOG_LEVELS[ SEZ_LOG_LEVEL ];
+
+            if ( !isset( SEZ_LOG_LEVELS[ SEZ()->settings->merge_log_level ] ) ){ return; }
+            $app_level = SEZ_LOG_LEVELS[ SEZ()->settings->merge_log_level ];
 
             if ( $level > $app_level ){ return; }
 
