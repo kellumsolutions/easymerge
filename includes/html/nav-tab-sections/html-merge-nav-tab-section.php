@@ -29,7 +29,7 @@
                             <p>Nothing found for last merge.</p>
                         </div>
             <?php    else: ?>
-                        <div class="col-8">
+                        <div class="col-6">
                             <p>Status: <strong><?= $last_merge[ "status" ]; ?></strong></p>
                             <?php if ( !empty( $last_merge[ "error" ] ) ): ?>
                                 <p style="color:red"><strong>ERROR: <?= $last_merge[ "error" ]; ?></strong></p>
@@ -45,26 +45,14 @@
                             ?>
                             
                         </div>
+                        <div class="col-2"></div>
                         <div class="col-4" style="text-align:right">
                             <p>Job ID: <?= $last_merge[ "job_id" ]; ?></p>
                             <p>Started: <?= $last_merge[ "start_time" ]; ?></p>
                             <p>Finished: <?= $last_merge[ "end_time" ]; ?></p>
                             <p>Duration: <?= $last_merge[ "duration" ]; ?></p>
                         </div>
-            <?php    endif; ?>
-            
-            <!-- <div class="col-8">
-                <p>Status: <strong>Successful</strong></p>
-                <p>23 merged changes. <span class="easysync-hyperlink">View details</span></p>
-                <p>3 database changes were unable to be merged. <span class="easysync-hyperlink">View details</span></p>
-                <p><span class="easysync-hyperlink">View Merge Log</span></p>
-            </div>
-            <div class="col-4" style="text-align:right">
-                <p>Job ID: 2dhi3sks997</p>
-                <p>Started: 2/23/22 1:17pm</p>
-                <p>Finished: 2/23/22 1:19pm</p>
-                <p>Duration: 2m 36s</p>
-            </div> -->
+            <?php    endif; ?>            
         </div>
     </div>
     

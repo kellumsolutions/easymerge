@@ -64,6 +64,11 @@
         }
 
 
+        public function get_path(){
+            return trailingslashit( wp_upload_dir()[ "basedir" ] ) . $this->file_name;
+        }
+
+
         static function instance(){
             if ( is_null( self::$_instance ) ) {
                 self::$_instance = new self();

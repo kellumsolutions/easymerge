@@ -23,7 +23,7 @@
             $this->define( 'SEZ_ASSETS_URL', SEZ_PLUGIN_URL . '/assets/' );
             $this->define( 'SEZ_TMP_DIR', SEZ_ABSPATH . 'tmp/' );
             $this->define( 'SEZ_TMP_URL', SEZ_PLUGIN_URL . '/tmp/' );
-            $this->define( 'SEZ_LOG_LEVEL', 'DEBUG' );
+            // $this->define( 'SEZ_LOG_LEVEL', 'DEBUG' );
             $this->define( 
                 'SEZ_LOG_LEVELS', 
                 array(
@@ -53,6 +53,7 @@
 
             include_once SEZ_ABSPATH . '/includes/class-sez-sync.php';
             include_once SEZ_ABSPATH . '/includes/class-sez-sync-functions.php';
+            include_once SEZ_ABSPATH . '/includes/class-sez-advanced-tools.php';
 
             include_once SEZ_ABSPATH . '/includes/expressions/class-sez-rule-expression.php';
             include_once SEZ_ABSPATH . '/includes/expressions/class-sez-rule-equality-expression.php';

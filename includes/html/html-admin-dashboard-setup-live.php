@@ -19,7 +19,7 @@
         <br>
 
         <p id="error" style="color:red"></p>
-        <button type="button" id="ezs_authorize" class="btn btn-success sez-dynamic-button">
+        <button type="button" id="ezs_authorize" class="btn btn-success easysync-dynamic">
             <span>
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                 Processing...

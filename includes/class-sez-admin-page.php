@@ -11,6 +11,7 @@
             add_action( 'wp_ajax_sez_sync_get_status', array( __CLASS__, 'get_sync_status' ) );
             add_action( 'wp_ajax_sez_admin_actions', array( __CLASS__, 'do_admin_actions' ) );
             add_action( 'wp_ajax_sez_save_settings', array( __CLASS__, 'save_settings' ) );
+            add_action( 'wp_ajax_sez_run_advancedtool', array( __CLASS__, 'run_advanced_tool' ) );
         }
 
 
@@ -226,7 +227,28 @@
             if ( is_wp_error( $result = SEZ()->settings->save() ) ){
                 wp_send_json_error( $result );
             }
-            return wp_send_json( $_POST );
+            return wp_send_json( true );
+        }
+
+
+        public static function run_advanced_tool(){
+            if ( !isset( $_POST[ "easysync_advancedtools" ] ) || empty( $_POST[ "easysync_advancedtools" ] ) ){
+                return wp_send_json_error( new WP_Error( "run_advancedtool_error", "<span class='easysync-advancedtool-fail'>Missing required parameter.</span>" ) );
+            }
+
+            if ( "reset_settings" === $_POST[ "easysync_advancedtools" ] ){
+                if ( is_wp_error( $result = SEZ_Advanced_Tools::reset_settings() ) ){
+                    return wp_send_json_error( $result );
+                }
+                return wp_send_json( "<span class='easysync-advancedtool-success'>Successfully reset settings. Redirecting...</span>" );
+            
+            } elseif ( "reset_data" === $_POST[ "easysync_advancedtools" ] ){
+                if ( is_wp_error( $result = SEZ_Advanced_Tools::reset_data() ) ){
+                    return wp_send_json_error( $result );
+                }
+                return wp_send_json( "<span class='easysync-advancedtool-success'>Successfully reset data. Redirecting...</span>" );
+            }
+            return wp_send_json_error( new WP_Error( "run_advancedtool_error", "<span class='easysync-advancedtool-fail'>EOL error occurred. Please try again later.</span>" ) );
         }
     }
 

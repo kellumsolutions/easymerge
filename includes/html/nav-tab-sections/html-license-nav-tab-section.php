@@ -1,4 +1,5 @@
 <div style="display:none" id="easysync-nav-tab-license-content"> 
+    <br>
     <table class="table table-striped" style="margin-left: 7px">
         <tbody>
             <tr>
@@ -11,5 +12,5 @@
             </tr>
         </tbody>
     </table>
-    <p><strong style="text-transform:uppercase">Important:</strong> Do not share license key.</p>
+    <p><strong style="text-transform:uppercase;font-weight: bold">Important:</strong> Do not share license key.</p>
 </div>

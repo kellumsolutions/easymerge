@@ -63,6 +63,11 @@
                 }
             }
         }
+
+
+        public static function delete(){
+            delete_option( self::$option_name );
+        }
     }
 
 ?>

@@ -37,7 +37,7 @@
         <br>
         <input type="hidden" name="action" value="sez_save_settings" />
         <p class="error" style="color:red"></p>
-        <button type="submit" class="btn btn-primary easysync-dynamic">
+        <button type="submit" class="btn btn-primary easysync-dynamic" disabled >
             <span>
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                 Saving...

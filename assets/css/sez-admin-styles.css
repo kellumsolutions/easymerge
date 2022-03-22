@@ -149,3 +149,22 @@ button.easysync-dynamic.processing > span:nth-of-type(2){
 #easysync-nav-tab-settings-content table td span {
     font-size: 13px;
 }
+#easysync-nav-tab-advancedtools-content table tr td {
+    padding-top: 20px;
+}
+#easysync-nav-tab-advancedtools-content table tr > td:nth-of-type(2) button {
+    margin-bottom: 7px;
+}
+#easysync-nav-tab-advancedtools-content table tr > td:nth-of-type(2) .spinner-border {
+    margin-right: 5px;
+}
+#easysync-nav-tab-advancedtools-content .easysync-advancedtool-response {
+    font-size: 13px;
+    padding-left: 10px;
+}
+#easysync-nav-tab-advancedtools-content .easysync-advancedtool-response > .easysync-advancedtool-fail {
+    color:red;
+}
+#easysync-nav-tab-advancedtools-content .easysync-advancedtool-response > .easysync-advancedtool-success {
+    color:green;
+}
