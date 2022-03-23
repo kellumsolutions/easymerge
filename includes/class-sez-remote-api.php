@@ -5,6 +5,20 @@
         private static $endpoint = "https://api.easysyncwp.com/wp-json/easysync/v1";
 
 
+		public static function get_registrations( $args ){
+			$response = wp_remote_get(
+                add_query_arg(
+                	$args,
+					"https://api.easysyncwp.com/wp-json/easysync/v1/register"
+				)
+            );
+
+            $response = new SEZ_Api_Response( $response );
+            $response = $response->extract();
+            return $response;
+		}
+		
+		
         public static function create_new_registration( $args ){
             $response = wp_remote_post(
                 "https://api.easysyncwp.com/wp-json/easysync/v1/register",

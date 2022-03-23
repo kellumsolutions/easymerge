@@ -1,34 +1,18 @@
-<div class="wrap">
-    <h1 style="position:relative">
-        <?php echo esc_html( get_admin_page_title() ); ?>
-    </h1>
-
-    <div style="margin: 25px 0">
-        <h5>Setup Live Site</h5>
-        <p>Get your live site registered now, so you can begin syncing changes.</p>
-
-        <div class="mb-3" style="max-width: 350px">
-            <label for="sez_name" class="form-label">Name</label>
-            <input id="sez_name" v-model="" type="text" class="form-control" placeholder="John Doe" >
-        </div>
-
-        <div class="mb-3" style="max-width: 350px;">
-            <label for="sez_email" class="form-label">Email</label>
-            <input id="sez_email" v-model="" type="text" class="form-control" placeholder="email@example.com" >
-        </div>
-        <br>
-
-        <p id="error" style="color:red"></p>
-        <button type="button" id="ezs_authorize" class="btn btn-success easysync-dynamic">
-            <span>
-                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                Processing...
-            </span>
-            <span>Authorize Live Site</span>
-        </button>
-    </div>
+<div style="margin: 25px 0">
+    <h5>Authorize Dev Site</h5>
+    <p>Authorize your dev site now, so you can begin syncing changes from <strong class="text-success"><?= $live_site; ?></strong>.</p>
+    <p>License Key: <strong class="text-success"><?= $license_key; ?></strong></p>
+    <p>Live Site: <strong class="text-success"><?= $live_site; ?></strong></p>
+    <br>
+    <p id="error" style="color:red"></p>
+    <button type="button" id="ezs_authorize" class="btn btn-success sez-dynamic-button">
+        <span>
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Processing...
+        </span>
+        <span>Authorize Dev Site</span>
+    </button>
 </div>
-
 
 <script>
 
@@ -60,9 +44,7 @@
 
     function ezs_post_authorize( callback_success, callback_fail ){
         var data = { 
-            name: jQuery( "#sez_name" ).val(),
-            email: jQuery( "#sez_email" ).val(),
-            register_live_site: true,
+            register_dev_site: true,
             action: "sez_admin_actions"
         };
 

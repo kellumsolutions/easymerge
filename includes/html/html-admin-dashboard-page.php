@@ -1,4 +1,4 @@
-<div class="wrap" id="synceasy_staging">
+<div class="wrap" id="easysync-admin">
     <h1 style="position:relative">
         <?php echo esc_html( get_admin_page_title() ); ?>
     </h1>

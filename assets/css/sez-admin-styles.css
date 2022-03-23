@@ -162,9 +162,13 @@ button.easysync-dynamic.processing > span:nth-of-type(2){
     font-size: 13px;
     padding-left: 10px;
 }
-#easysync-nav-tab-advancedtools-content .easysync-advancedtool-response > .easysync-advancedtool-fail {
+#easysync-nav-tab-advancedtools-content .easysync-advancedtool-response > .easysync-advancedtool-fail,
+.easysync-response-fail {
     color:red;
 }
 #easysync-nav-tab-advancedtools-content .easysync-advancedtool-response > .easysync-advancedtool-success {
     color:green;
+}
+.easysync-response-fail {
+	font-weight: bold;
 }

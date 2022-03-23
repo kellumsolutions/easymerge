@@ -12,6 +12,7 @@
             add_action( 'wp_ajax_sez_admin_actions', array( __CLASS__, 'do_admin_actions' ) );
             add_action( 'wp_ajax_sez_save_settings', array( __CLASS__, 'save_settings' ) );
             add_action( 'wp_ajax_sez_run_advancedtool', array( __CLASS__, 'run_advanced_tool' ) );
+            add_action( 'wp_ajax_sez_get_trackers', array( __CLASS__, 'get_site_trackers' ) );
         }
 
 
@@ -35,11 +36,41 @@
                     wp_enqueue_style( 'sez-bootstrap-style', SEZ_ASSETS_URL . "css/bootstrap.min.css" );
                     wp_enqueue_style( 'sez-admin-style', SEZ_ASSETS_URL . "css/sez-admin-styles.css" );
                     wp_enqueue_script( 'easysync-admin-common', SEZ_ASSETS_URL . "js/easysync-admin-common.js", array( 'jquery' ), false, true );
+                    
+                    // Load content and scripts based on environment state.
+					if ( empty( SEZ()->settings->live_site ) || empty( SEZ()->settings->license ) ){
+						add_action( 'easysync_merge_sync_content', function(){
+			            	require_once( __DIR__ . "/html/merge-content/html-merge-setup-live-content.php" );
+		            	});
+		            
+		            } elseif ( sez_clean_domain( site_url() ) === sez_clean_domain( SEZ()->settings->live_site ) ) {
+			            wp_enqueue_script( 'easysync-admin-live-site', SEZ_ASSETS_URL . "js/easysync-admin-live-site.js", array( 'jquery', 'easysync-admin-common' ), false, true );
+			            
+		            	add_action( 'easysync_merge_sync_content', function(){
+			            	require_once( __DIR__ . "/html/merge-content/html-merge-live-content.php" );
+		            	});
+		            	
+		            } elseif ( empty( SEZ()->settings->dev_site ) ){
+			            add_action( 'easysync_merge_sync_content', function(){
+			            	require_once( __DIR__ . "/html/merge-content/html-merge-setup-dev-content.php" );
+		            	});
+		
+		            } elseif ( sez_clean_domain( site_url() ) === sez_clean_domain( SEZ()->settings->dev_site ) ) {
+		            	add_action( 'easysync_merge_sync_content', function(){
+			            	require_once( __DIR__ . "/html/merge-content/html-merge-dev-content.php" );
+		            	});
+		            	
+		            } else {
+		                // Bad install.
+		                add_action( 'easysync_merge_sync_content', function(){
+			            	require_once( __DIR__ . "/html/merge-content/html-bad-install-content.php" );
+		            	});
+		            }
                 }
             }
         }
-
-
+        
+        
         public static function output(){
             
             // Request to change which rules are enabled.
@@ -54,32 +85,8 @@
                 }
                 SEZ_Rules::enable_rules( $rules_to_enable );
             }
-
-            if ( empty( SEZ()->settings->live_site ) || empty( SEZ()->settings->license ) ){
-                require_once SEZ_ABSPATH . "includes/html/html-admin-dashboard-setup-live.php";
             
-            } elseif ( sez_clean_domain( site_url() ) === sez_clean_domain( SEZ()->settings->live_site ) ) {
-                // Delete dev_site from site_options.
-                // In case this is a restore from a dev site.
-                SEZ()->settings->dev_site = "";
-                SEZ()->settings->save();
-                $license_key = SEZ()->settings->license;
-                require_once SEZ_ABSPATH . "includes/html/html-admin-dashboard-live.php";
-            
-            } elseif ( empty( SEZ()->settings->dev_site ) ){
-                $license_key = SEZ()->settings->license;
-                $live_site = SEZ()->settings->live_site;
-                require_once SEZ_ABSPATH . "includes/html/html-admin-dashboard-setup-dev.php";
-
-            } elseif ( sez_clean_domain( site_url() ) === sez_clean_domain( SEZ()->settings->dev_site ) ) {
-                require_once SEZ_ABSPATH . "includes/html/html-admin-dashboard-staging.php";
-            
-            } else {
-                // Bad install.
-                // Dev domain name might have changed.
-                // Prompt reinstall (clean)? Clears dev_site in site_options so dev site is re-registered.
-                require_once SEZ_ABSPATH . "includes/html/html-admin-dashboard-bad-dev-install.php";
-            }
+            require_once( __DIR__ . "/html/html-admin-dashboard-page.php" );
         }
 
 
@@ -249,6 +256,42 @@
                 return wp_send_json( "<span class='easysync-advancedtool-success'>Successfully reset data. Redirecting...</span>" );
             }
             return wp_send_json_error( new WP_Error( "run_advancedtool_error", "<span class='easysync-advancedtool-fail'>EOL error occurred. Please try again later.</span>" ) );
+        }
+        
+        
+        public static function get_site_trackers(){
+	        $args = array(
+		        "license_key" => SEZ()->settings->license,
+		        "live_site" => SEZ()->settings->live_site
+	        );
+	        $response = SEZ_Remote_Api::get_registrations( $args );
+	        
+	        if ( is_wp_error( $response ) ){
+		        return wp_send_json( "<div class='row'><div class='col'><p class='easysync-response-fail'>An error occurred fetching site trackers. ERROR: " . $response->get_error_message() . "</p></div></div>" );
+	        }
+	        
+	        $sites = array();
+	        
+	        foreach( $response as $registration ){
+		        if ( empty( $registration->staging_domain ) ){
+			        continue;
+		        } 
+		        $sites[] = $registration;
+	        }
+	        
+	        if ( empty( $sites ) ){
+		        return wp_send_json( "<div class='row'><div class='col'><p>Site is currently not being tracked. Start tracking now! Follow the instructions below.</p></div></div>" );
+	        }
+	        
+	        $output = "";
+	        
+	        foreach ( $sites as $site ){
+		        $since = $site->created_at;
+		        $since = date( "D, M d, Y h:i:s a", strtotime( $since ) );
+		        
+		        $output .= "<div class='row'><div class='col-6'><h5><a href='//" . $site->staging_domain . "' target='_blank'>" . $site->staging_domain. "</a></h5><p>Tracking since: " . $since . "</p></div><div class='col-6 text-end'><p>Status: <strong>" . ucfirst( $site->status ) . "</strong></p></div></div>";
+	        }
+	        return wp_send_json( $output );
         }
     }
 

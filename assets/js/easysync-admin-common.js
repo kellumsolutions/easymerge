@@ -23,7 +23,7 @@ function wp_error_message( response ){
 
 
 jQuery( document ).ready( function( $ ){
-    var easysync = {
+    window.easysync = {
         $nav_tab_wrapper: $( ".easysync-nav-tab-wrapper" ),
         $rules_form: $( "#easysync-merge-rules-form" ),
         $last_merge_section: $( "#easysync-last-merge-section" ),
