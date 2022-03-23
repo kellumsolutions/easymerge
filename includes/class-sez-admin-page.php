@@ -39,24 +39,30 @@
                     
                     // Load content and scripts based on environment state.
 					if ( empty( SEZ()->settings->live_site ) || empty( SEZ()->settings->license ) ){
-						add_action( 'easysync_merge_sync_content', function(){
+						// Setup live env.
+                        add_action( 'easysync_merge_sync_content', function(){
 			            	require_once( __DIR__ . "/html/merge-content/html-merge-setup-live-content.php" );
 		            	});
 		            
 		            } elseif ( sez_clean_domain( site_url() ) === sez_clean_domain( SEZ()->settings->live_site ) ) {
-			            wp_enqueue_script( 'easysync-admin-live-site', SEZ_ASSETS_URL . "js/easysync-admin-live-site.js", array( 'jquery', 'easysync-admin-common' ), false, true );
+			            // Live env.
+                        wp_enqueue_script( 'easysync-admin-live-site', SEZ_ASSETS_URL . "js/easysync-admin-live-site.js", array( 'jquery', 'easysync-admin-common' ), false, true );
 			            
 		            	add_action( 'easysync_merge_sync_content', function(){
 			            	require_once( __DIR__ . "/html/merge-content/html-merge-live-content.php" );
 		            	});
 		            	
 		            } elseif ( empty( SEZ()->settings->dev_site ) ){
+                        // Setup dev env.
 			            add_action( 'easysync_merge_sync_content', function(){
 			            	require_once( __DIR__ . "/html/merge-content/html-merge-setup-dev-content.php" );
 		            	});
 		
 		            } elseif ( sez_clean_domain( site_url() ) === sez_clean_domain( SEZ()->settings->dev_site ) ) {
-		            	add_action( 'easysync_merge_sync_content', function(){
+		            	// Dev env.
+                        wp_enqueue_script( 'easysync-admin-dev-site', SEZ_ASSETS_URL . "js/easysync-admin-dev-site.js", array( 'jquery', 'easysync-admin-common' ), false, true );
+
+                        add_action( 'easysync_merge_sync_content', function(){
 			            	require_once( __DIR__ . "/html/merge-content/html-merge-dev-content.php" );
 		            	});
 		            	
