@@ -192,8 +192,9 @@ jQuery( document ).ready( function( $ ){
             });
         },
         on_close_merge_console: function( e ){
-            easysync.modals.$merge_console.removeClass( "active" );
-            easysync.clear_merge_console();
+            window.location.reload();
+            // easysync.modals.$merge_console.removeClass( "active" );
+            // easysync.clear_merge_console();
         },
         clear_merge_console: function(){
             $( "#easysync-console-error" ).hide();

@@ -185,7 +185,8 @@
                 return new WP_Error( "sez_sync_error", "Changes file {$file} does not exist." );
             }
 
-            // Ensure there is actual data.
+            // Ensure there is actual data. 
+            // Should have a couple of bytes even if there are no changes. 
             if ( 0 === (int)filesize( $file ) ){
                 return new WP_Error( "sez_sync_error", "No data read from changes file {$file}." );
             }
@@ -264,8 +265,13 @@
                 ARRAY_A
             );
 
-            if ( empty( $results ) ){
+            if ( is_null( $results ) ){
                 return new WP_Error( "sez_sync_error", "Unable to get job changes for job ID {$job_id} from database." );
+            }
+
+            if ( empty( $results ) ){
+                SEZ_Sync::log( $log, "No changes to process. Skipping perform_changes()." );
+                return true;
             }
 
             $changes = array();

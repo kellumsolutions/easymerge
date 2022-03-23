@@ -68,12 +68,30 @@
             add_filter( "sez_before_change_execute", "sez_adjust_primary_key_for_updates_deletes", 10, 4 );
 
             add_action( "init", array( $this, "on_init" ) );
+            add_action( "admin_notices", array( $this, "uploads_dir_permissions_notice" ) );
         }
 
 
         function on_init(){
             $this->sync = new SEZ_Sync();
             $this->settings = SEZ_Settings::instance();
+        }
+
+
+        function uploads_dir_permissions_notice(){
+            if ( function_exists( 'get_current_screen' ) ) {
+                $screen = get_current_screen();
+
+                if ( is_object( $screen ) && property_exists( $screen, 'id' ) && $screen->id === "tools_page_" . SyncEasy_Admin_Page::$handle ){
+                    if ( false === wp_is_writable( wp_upload_dir()[ "basedir" ] ) ){
+                    ?>
+                        <div class="notice notice-error">
+                            <p>Uploads directory does not have write permissions. EasySync requires the uploads directory to be writeable to function correctly.</p>
+                        </div>
+                    <?php
+                    }
+                }
+            }
         }
 
 
