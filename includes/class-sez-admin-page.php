@@ -223,6 +223,10 @@
                 
                 SEZ()->settings->dev_site = site_url();
                 SEZ()->settings->save();
+
+                // Reset map.
+                SEZ_Map::delete();
+                
                 return wp_send_json_success( true );
             
             } elseif ( isset( $_POST[ "reset_dev_site" ] ) ){
