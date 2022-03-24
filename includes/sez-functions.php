@@ -594,4 +594,40 @@
         }
     }
 
+
+    if ( !function_exists( 'sez_sync_usermeta' ) ){
+        function sez_sync_usermeta( $change, $job_id, $log ){
+            global $wpdb;
+
+            $meta_key = $change->data[2];
+            $update = array();
+
+            // Bug fix: LIFE-28 - User role not syncing correctly after merge.
+            // Ensures prefix on umeta_key wp_capabilities and wp_user_level are correct.
+            // In case the table prefix is different in dev than live environment.
+            if ( false !== strpos( $meta_key, "capabilities" ) ){
+                $update[ "meta_key" ] = $wpdb->prefix . "capabilities";
+            } elseif ( false !== strpos( $meta_key, "user_level" ) ){
+                $update[ "mea_key" ] = $wpdb->prefix . "user_level";
+            }
+
+            $user_id = $change->data[1];
+            $dev_user_id = SEZ_Map::get_value( $wpdb->users, "ID", $user_id, false );
+
+            if ( false !== $dev_user_id ){
+                $update[ "user_id" ] = $dev_user_id;
+            }
+
+            if ( !empty( $update ) ){
+                // In case the user meta id changed.
+                $umeta_id = $change->data[0];
+                $umeta_id = SEZ_Map::get_value( $wpdb->usermeta, "umeta_id", $umeta_id, $umeta_id );
+                $result = $wpdb->update(
+                    $wpdb->usermeta,
+                    $update,
+                    array( "umeta_id" => $umeta_id )
+                );
+            }
+        }
+    }
 ?>

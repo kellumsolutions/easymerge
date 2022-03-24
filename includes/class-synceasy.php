@@ -62,13 +62,19 @@
         }
 
         function init_hooks(){
+            global $wpdb;
+
             register_activation_hook( SEZ_PLUGIN_FILE, array( 'SEZ_Install', 'install' ) );
+
+            add_action( "init", array( $this, "on_init" ) );
+            add_action( "admin_notices", array( $this, "uploads_dir_permissions_notice" ) );
 
             add_action( "sez_after_change_execute", "sez_save_mapping", 20, 5 );
             add_filter( "sez_before_change_execute", "sez_adjust_primary_key_for_updates_deletes", 10, 4 );
 
-            add_action( "init", array( $this, "on_init" ) );
-            add_action( "admin_notices", array( $this, "uploads_dir_permissions_notice" ) );
+            if ( SEZ_Rules::is_rule_enabled( "include_all_users" ) ){
+                add_action( 'sez_perform_adjustments_' . $wpdb->usermeta, "sez_sync_usermeta", 20, 3 );
+            }
         }
 
 
