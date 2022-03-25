@@ -75,6 +75,12 @@
             if ( SEZ_Rules::is_rule_enabled( "include_all_users" ) ){
                 add_action( 'sez_perform_adjustments_' . $wpdb->usermeta, "sez_sync_usermeta", 20, 3 );
             }
+
+            // Fixes comment sync issues.
+            // LIFE-30, LIFE-31, LIFE-32
+            if ( SEZ_Rules::is_rule_enabled( "include_all_comments" ) ){
+                add_action( 'sez_perform_adjustments_' . $wpdb->comments, "sez_sync_comments", 20, 3 );
+            }
         }
 
 

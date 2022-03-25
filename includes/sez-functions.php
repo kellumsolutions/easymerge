@@ -630,4 +630,45 @@
             }
         }
     }
+
+
+    if ( !function_exists( 'sez_sync_comments' ) ){
+        function sez_sync_comments( $change, $job_id, $log ){
+            global $wpdb;
+        
+            $live_post_id = $change->data[1];
+            $live_comment_parent = $change->data[13];
+            $live_user_id = $change->data[14];
+        
+            $update = array();
+        
+            $dev_post_id = SEZ_Map::get_value( $wpdb->posts, "ID", $live_post_id, false );
+            if ( false !== $dev_post_id ){
+                $update[ "comment_post_ID" ] = $dev_post_id;
+            }
+        
+            if ( 0 !== (int)$live_user_id ){
+                $dev_user_id = SEZ_Map::get_value( $wpdb->users, "ID", $live_user_id, false );
+                if ( false !== $dev_user_id ){
+                    $update[ "user_id" ] = $dev_user_id;
+                }
+            }
+
+            if ( 0 !== (int)$live_comment_parent ){
+                $dev_comment_parent = SEZ_Map::get_value( $wpdb->comments, "comment_ID", $live_comment_parent, false );
+                if ( false !== $dev_comment_parent ){
+                    $update[ "comment_parent" ] = $dev_comment_parent;
+                }
+            }
+        
+            if ( !empty( $update ) ){
+                $comment_id = SEZ_Map::get_value( $wpdb->comments, "comment_ID", $change->data[0], $change->data[0] );
+                $result = $wpdb->update(
+                    $wpdb->comments,
+                    $update,
+                    array( "comment_ID" => $comment_id )
+                );
+            }
+        }
+    }
 ?>
