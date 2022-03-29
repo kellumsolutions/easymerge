@@ -1,5 +1,7 @@
 <?php
 
+    defined( 'ABSPATH' ) || exit;
+
     abstract class SEZ_Rule_Expression {
         
         protected $operator = '';

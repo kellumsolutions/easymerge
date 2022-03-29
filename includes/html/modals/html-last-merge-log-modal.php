@@ -1,4 +1,6 @@
 <?php
+    defined( 'ABSPATH' ) || exit;
+    
     $jobdata = sez_get_last_merge_job();
     $job_id = empty( $jobdata ) ? false : $jobdata[ "job_id" ];
 ?>

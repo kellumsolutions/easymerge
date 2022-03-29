@@ -1,4 +1,6 @@
 <?php
+    defined( 'ABSPATH' ) || exit;
+    
     $merged_changes = array();
     $unmerged_changes = array();
     $jobdata = sez_get_last_merge_job();

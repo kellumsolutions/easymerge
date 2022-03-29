@@ -1,5 +1,6 @@
 <?php
-
+    defined( 'ABSPATH' ) || exit;
+    
     class SEZ_Settings {
 
         protected static $_instance = null;

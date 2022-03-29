@@ -1,5 +1,6 @@
 <?php
-
+    defined( 'ABSPATH' ) || exit;
+    
     class SyncEasy_Admin_Page {
 
         public static $handle = "easysync";

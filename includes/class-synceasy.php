@@ -1,5 +1,6 @@
 <?php
-
+    defined( 'ABSPATH' ) || exit;
+    
     final class SyncEasy {
         
         protected static $_instance = null;

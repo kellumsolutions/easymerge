@@ -1,5 +1,6 @@
 <?php
-
+    defined( 'ABSPATH' ) || exit;
+    
     class SEZ_Install {
 
         public static function install(){

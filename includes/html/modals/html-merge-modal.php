@@ -1,3 +1,5 @@
+<?php defined( 'ABSPATH' ) || exit; ?>
+
 <!-- Sync modal -->
 <div id="sez_sync_modal" style="padding-top:100px">
     <img class="sez-hidden" id="sez_sync_modal_close_button" src="<?= SEZ_ASSETS_URL; ?>icons/3x/close-icon@3x.png" />

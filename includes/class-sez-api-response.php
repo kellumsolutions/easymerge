@@ -1,5 +1,6 @@
 <?php
-
+    defined( 'ABSPATH' ) || exit;
+    
     class SEZ_Api_Response {
         
         private $data = null;

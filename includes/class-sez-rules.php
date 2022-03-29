@@ -1,5 +1,6 @@
 <?php
-
+    defined( 'ABSPATH' ) || exit;
+    
     class SEZ_Rules {
 
         private static $option = "sez_rules_props";

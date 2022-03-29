@@ -1,5 +1,6 @@
 <?php
-
+    defined( 'ABSPATH' ) || exit;
+    
     class SEZ_Advanced_Tools {
         public static function reset_settings(){
             try {

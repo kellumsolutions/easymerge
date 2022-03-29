@@ -1,4 +1,6 @@
 <?php
+    defined( 'ABSPATH' ) || exit;   
+
     $dev_site = SEZ()->settings->dev_site;
     $live_site = SEZ()->settings->live_site;
     $site_env = "Live";

@@ -1,3 +1,5 @@
+<?php defined( 'ABSPATH' ) || exit; ?>
+
 <div class="wrap" id="easysync-admin">
     <h1 style="position:relative">
         <?php echo esc_html( get_admin_page_title() ); ?>

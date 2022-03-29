@@ -1,5 +1,6 @@
 <?php
-
+    defined( 'ABSPATH' ) || exit;
+    
     class SEZ_Remote_Api {
 
         private static $endpoint = "https://api.easysyncwp.com/wp-json/easysync/v1";

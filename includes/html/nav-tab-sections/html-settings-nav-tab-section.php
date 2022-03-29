@@ -1,4 +1,6 @@
 <?php
+    defined( 'ABSPATH' ) || exit;
+    
     $log_levels = array_keys( SEZ_LOG_LEVELS );
 ?>
 

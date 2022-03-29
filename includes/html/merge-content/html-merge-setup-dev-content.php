@@ -1,3 +1,5 @@
+<?php defined( 'ABSPATH' ) || exit; ?>
+
 <div style="margin: 25px 0">
     <h5>Authorize Dev Site</h5>
     <p>Authorize your dev site now, so you can begin syncing changes from <strong class="text-success"><?= SEZ()->settings->live_site; ?></strong>.</p>

@@ -1,3 +1,5 @@
+<?php defined( 'ABSPATH' ) || exit; ?>
+
 <div style="display:none" id="easysync-nav-tab-license-content"> 
     <br>
     <table class="table table-striped" style="margin-left: 7px">

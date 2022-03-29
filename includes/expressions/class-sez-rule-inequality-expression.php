@@ -1,5 +1,7 @@
 <?php
 
+    defined( 'ABSPATH' ) || exit;
+
     class SEZ_Rule_Inequality_Expression extends SEZ_Rule_Expression {
 
         function __construct( $operator, $values ){

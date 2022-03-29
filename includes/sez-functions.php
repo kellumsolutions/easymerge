@@ -1,5 +1,6 @@
 <?php
 
+    defined( 'ABSPATH' ) || exit;
 
     if ( !function_exists( 'sez_get_tables' ) ){
         function sez_get_tables( $with_prefix = true ){

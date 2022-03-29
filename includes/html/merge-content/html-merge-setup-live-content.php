@@ -1,3 +1,5 @@
+<?php defined( 'ABSPATH' ) || exit; ?>
+
 <div style="margin: 25px 0">
     <h5>Setup Live Site</h5>
     <p>Get your live site registered now, so you can begin syncing changes.</p>

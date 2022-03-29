@@ -1,3 +1,5 @@
+<?php defined( 'ABSPATH' ) || exit; ?>
+
 <div style="display:none" id="easysync-nav-tab-advancedtools-content"> 
     <br>
     <table class="table" style="margin-left: 7px">

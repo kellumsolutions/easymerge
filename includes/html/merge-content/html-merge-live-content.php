@@ -1,3 +1,5 @@
+<?php defined( 'ABSPATH' ) || exit; ?>
+
 <h5>Sites tracking changes</h5>
 <div class="easysync-content-wrapper postbox easysync-currently-tracking">
     <div class="row">

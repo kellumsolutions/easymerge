@@ -1,3 +1,5 @@
+<?php defined( 'ABSPATH' ) || exit; ?>
+
 <h5>Next Scheduled Merge</h5>
 <div class="easysync-content-wrapper postbox">
     <div class="row">
