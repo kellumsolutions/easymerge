@@ -34,13 +34,13 @@
                         <?php if ( !empty( $last_merge[ "error" ] ) ): ?>
                             <p style="color:red"><strong>ERROR: <?= esc_html( $last_merge[ "error" ] ); ?></strong></p>
                         <?php endif; ?>
-                        <p><?= esc_html( $last_merge[ "merged_changes" ] ); ?></p>
-                        <p><?= esc_html( $last_merge[ "unmerged_changes" ] ); ?></p>
+                        <p><?= $last_merge[ "merged_changes" ]; ?></p>
+                        <p><?= $last_merge[ "unmerged_changes" ]; ?></p>
                         <?php
                             $job_id = $last_merge[ "job_id" ];
                             $log_path = SEZ_Merge_Log::get_path( $job_id );
                             if ( file_exists( $log_path ) ){
-                                echo esc_html( "<p><span data-job-id='{$job_id}' id='easysync-view-last-merge-log' class='easysync-hyperlink'>View Merge Log</span></p>" );
+                                echo "<p><span data-job-id='{esc_html( $job_id )}' id='easysync-view-last-merge-log' class='easysync-hyperlink'>View Merge Log</span></p>";
                             }
                         ?>
                         

@@ -22,13 +22,13 @@
                 if ( $job_id ){
                     $log = sez_get_merge_log( $job_id );
                     if ( is_wp_error( $log ) ){
-                        echo esc_html( "<p style='color:red'><strong>" . $log->get_error_message() . "</strong></p>" );
+                        echo "<p style='color:red'><strong>" . esc_html( $log->get_error_message() ) . "</strong></p>";
                     
                     } else {
                 ?>
                     <div class="easysync-last-merge-log-blackbox">
                         <div class="easysync-last-merge-log-blackbox-content">
-                            <?= esc_html( $log->get_console_output() ); ?>
+                            <?= $log->get_console_output(); ?>
                         </div>
                     </div>
                 <?php

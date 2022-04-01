@@ -478,8 +478,8 @@
                         $unmerged_changes++;
                     }
                 }
-                $merged_changes = "{$merged_changes} merged changes. <span id='easysync-view-merged-details' class='easysync-hyperlink'>View details</span>";
-                $unmerged_changes = "{$unmerged_changes} unmerged changes. <span id='easysync-view-unmerged-details' class='easysync-hyperlink'>View details</span>";
+                $merged_changes = esc_html( $merged_changes ) . " merged changes. <span id='easysync-view-merged-details' class='easysync-hyperlink'>View details</span>";
+                $unmerged_changes = esc_html( $unmerged_changes ) . " unmerged changes. <span id='easysync-view-unmerged-details' class='easysync-hyperlink'>View details</span>";
             }
 
             $error = "";
@@ -514,7 +514,7 @@
                 "error" => $error,
                 "merged_changes" => $merged_changes,
                 "unmerged_changes" => $unmerged_changes,
-                "status" => $jobdata[ "status" ] === "fail" ? "<span style='color:red'>" . ucfirst( $jobdata[ "status" ] ) . "</span>" : ucfirst( $jobdata[ "status" ] ),
+                "status" => $jobdata[ "status" ] === "fail" ? "<span style='color:red'>" . esc_html( ucfirst( $jobdata[ "status" ] ) ) . "</span>" : esc_html( ucfirst( $jobdata[ "status" ] ) ),
                 "job_id" => $job_id
             );
         }

@@ -152,8 +152,7 @@
             
             if ( $merge_complete ){
                 $path = SEZ_Merge_Log::get_path( $job_id );
-                $response[ "additional_output" ] .= "<h3>Merge Complete!</h3><p>The console output for this merge is saved at {$path}.</p>";
-                $response[ "additional_output" ] = esc_html( $response[ "additional_output" ] );
+                $response[ "additional_output" ] .= "<h3>Merge Complete!</h3><p>The console output for this merge is saved at " . esc_html( $path ) . ".</p>";
             }
 
             return wp_send_json_success( $response );

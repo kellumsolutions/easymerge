@@ -125,13 +125,13 @@
             $line = str_replace( "\n", "", $line );
             
             if ( false !== strpos( $line, "[ERROR]" ) ){
-                return "<p style='color:#ff4d4d'>{$line}</p>";
+                return "<p style='color:#ff4d4d'>" . esc_html( $line ) . "</p>";
 
             } elseif ( false !== strpos( $line, "[WARNING]" ) ){
-                return "<p style='color:#fff000'>{$line}</p>";
+                return "<p style='color:#fff000'>" . esc_html( $line ) . "</p>";
 
             } else {
-                return "<p>{$line}</p>";
+                return "<p>" . esc_html( $line ) . "</p>";
             }
         }
 
