@@ -19,7 +19,7 @@
                     <td>
                         <select name="easysync-merge-log-level">
                             <?php foreach( $log_levels as $level ): ?>
-                                <option value="<?= $level; ?>" <?= strtoupper( SEZ()->settings->merge_log_level ) === $level ? "selected" : ""; ?>><?= $level; ?></option>
+                                <option value="<?= esc_attr( $level ); ?>" <?= strtoupper( SEZ()->settings->merge_log_level ) === $level ? "selected" : ""; ?>><?= esc_html( $level ); ?></option>
                             <?php endforeach; ?>
                         </select>
                     </td>
@@ -30,7 +30,7 @@
                 </tr>
                 <tr>
                     <td>Auto-Delete Change Files<br>
-                        <span class="text-secondary">Old change files will be automatically deleted. Only the most recent change file will be retained. Change files by default are located in <?= trailingslashit( wp_upload_dir()[ "basedir" ] ) . "sez-changes"; ?></span>
+                        <span class="text-secondary">Old change files will be automatically deleted. Only the most recent change file will be retained. Change files by default are located in <?= esc_html( trailingslashit( wp_upload_dir()[ "basedir" ] ) . "sez-changes" ); ?></span>
                     </td>
                     <td><input type="checkbox" name="easysync-auto-delete-change-files" <?= SEZ()->settings->auto_delete_change_files ? "checked" : ""; ?>/></td>
                 </tr>

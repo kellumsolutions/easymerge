@@ -27,7 +27,7 @@
             <?php else: ?>
                 <ul style="list-style-type: disc">
                 <?php foreach( $merged_changes as $change ): ?>
-                    <li><?= $change; ?></li>
+                    <li><?= esc_html( $change ); ?></li>
                 <?php endforeach; ?>
                 </ul>
             <?php endif; ?>
@@ -40,7 +40,7 @@
             <?php else: ?>
                 <ul style="list-style-type: disc">
                 <?php foreach( $unmerged_changes as $change ): ?>
-                    <li><?= $change; ?></li>
+                    <li><?= esc_html( $change ); ?></li>
                 <?php endforeach; ?>
                 </ul>
             <?php endif; ?>

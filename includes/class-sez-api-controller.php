@@ -44,7 +44,7 @@
                 return rest_ensure_response( $err );
             }
 
-            $license_key = $_POST[ "license_key" ];
+            $license_key = sanitize_text_field( $_POST[ "license_key" ] );
 
             // Validate license key.
 //             $sez_settings = get_option( 'sez_site_settings' );
@@ -72,7 +72,7 @@
                 return rest_ensure_response( $err );
             }
 
-            $license_key = $_GET[ "license_key" ];
+            $license_key = sanitize_text_field( $_GET[ "license_key" ] );
 
             // Validate license key.            
             if ( SEZ()->settings->license !== $license_key ){

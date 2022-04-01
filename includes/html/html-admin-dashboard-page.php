@@ -8,10 +8,10 @@
     <?php require_once( __DIR__ . "/html-admin-site-details.php" ); ?>
 
     <div class="nav-tab-wrapper easysync-nav-tab-wrapper">
-        <a class="nav-tab nav-tab-active" id="easysync-nav-tab-merge" href="<?= admin_url( "tools.php?page=" . SyncEasy_Admin_Page::$handle . "#merge" ); ?>">Merge/Sync</a>
-        <a class="nav-tab" id="easysync-nav-tab-license" href="<?= admin_url( "tools.php?page=" . SyncEasy_Admin_Page::$handle . "#license" ); ?>">License</a>
-        <a class="nav-tab" id="easysync-nav-tab-settings" href="<?= admin_url( "tools.php?page=" . SyncEasy_Admin_Page::$handle . "#settings" ); ?>s">Settings</a>
-        <a class="nav-tab" id="easysync-nav-tab-advancedtools" href="<?= admin_url( "tools.php?page=" . SyncEasy_Admin_Page::$handle . "#advanced-tools" ); ?>">Advanced Tools</a>
+        <a class="nav-tab nav-tab-active" id="easysync-nav-tab-merge" href="<?= esc_url( admin_url( "tools.php?page=" . SyncEasy_Admin_Page::$handle . "#merge" ) ); ?>">Merge/Sync</a>
+        <a class="nav-tab" id="easysync-nav-tab-license" href="<?= esc_url( admin_url( "tools.php?page=" . SyncEasy_Admin_Page::$handle . "#license" ) ); ?>">License</a>
+        <a class="nav-tab" id="easysync-nav-tab-settings" href="<?= esc_url( admin_url( "tools.php?page=" . SyncEasy_Admin_Page::$handle . "#settings" ) ); ?>">Settings</a>
+        <a class="nav-tab" id="easysync-nav-tab-advancedtools" href="<?= esc_url( admin_url( "tools.php?page=" . SyncEasy_Admin_Page::$handle . "#advanced-tools" ) ); ?>">Advanced Tools</a>
     </div>
 
     <div class="easysync-nav-tab-content">

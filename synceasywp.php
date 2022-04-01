@@ -1,7 +1,7 @@
 <?php
 /**
- * Plugin Name: Sync Easy WP
- * Description: Easily sync database changes from live site to staging site.
+ * Plugin Name: EasyMerge
+ * Description: Easily merge database changes from a production environment to dev environments.
  * Author: Kellum Solutions
  * Version: 1.0.0
  * Author URI: https://www.kellumsolutions.com/
@@ -9,7 +9,6 @@
  * TODO: 
  * 	- Add filter function to rules conditions, so data can be imported based on a 
  *	 user defined function.
- *	- Show warning when uploads folder is not writable.
  */
  
 

@@ -6,7 +6,7 @@
         <tbody>
             <tr>
                 <td>License Key:</td>
-                <td><?= SEZ()->settings->license; ?></td>
+                <td><?= esc_html( SEZ()->settings->license ); ?></td>
             </tr>
             <tr>
                 <td>License Type:</td>

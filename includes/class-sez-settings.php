@@ -33,12 +33,12 @@
                 $data = file_get_contents( $file );
                 $data = json_decode( $data, true );
 
-                $this->license = isset( $data[ "license" ] ) ? $data[ "license" ] : "";
-                $this->live_site = isset( $data[ "live_site" ] ) ? $data[ "live_site" ] : "";
-                $this->dev_site = isset( $data[ "dev_site" ] ) ? $data[ "dev_site" ] : "";
-                $this->merge_log_level = isset( $data[ "merge_log_level" ] ) ? $data[ "merge_log_level" ] : "INFO";
-                $this->auto_delete_logs = isset( $data[ "auto_delete_logs" ] ) ? $data[ "auto_delete_logs" ] : false;
-                $this->auto_delete_change_files = isset( $data[ "auto_delete_change_files" ] ) ? $data[ "auto_delete_change_files" ] : true;
+                $this->license = isset( $data[ "license" ] ) ? sanitize_text_field( $data[ "license" ] ) : "";
+                $this->live_site = isset( $data[ "live_site" ] ) ? sanitize_text_field( $data[ "live_site" ] ) : "";
+                $this->dev_site = isset( $data[ "dev_site" ] ) ? sanitize_text_field( $data[ "dev_site" ] ) : "";
+                $this->merge_log_level = isset( $data[ "merge_log_level" ] ) ? sanitize_text_field( $data[ "merge_log_level" ] ) : "INFO";
+                $this->auto_delete_logs = isset( $data[ "auto_delete_logs" ] ) ? sanitize_text_field( $data[ "auto_delete_logs" ] ) : false;
+                $this->auto_delete_change_files = isset( $data[ "auto_delete_change_files" ] ) ? sanitize_text_field( $data[ "auto_delete_change_files" ] ) : true;
             }
         }
 

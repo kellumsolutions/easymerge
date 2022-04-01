@@ -15,20 +15,20 @@
       </div>
       <div class="modal-body">
             <?php if ( $job_id ): ?>
-                <p>Job ID: <?= $job_id; ?></p>
+                <p>Job ID: <?= esc_html( $job_id ); ?></p>
             <?php endif; ?>
 
             <?php
                 if ( $job_id ){
                     $log = sez_get_merge_log( $job_id );
                     if ( is_wp_error( $log ) ){
-                        echo "<p style='color:red'><strong>" . $log->get_error_message() . "</strong></p>";
+                        echo esc_html( "<p style='color:red'><strong>" . $log->get_error_message() . "</strong></p>" );
                     
                     } else {
                 ?>
                     <div class="easysync-last-merge-log-blackbox">
                         <div class="easysync-last-merge-log-blackbox-content">
-                            <?= $log->get_console_output(); ?>
+                            <?= esc_html( $log->get_console_output() ); ?>
                         </div>
                     </div>
                 <?php

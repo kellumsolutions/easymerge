@@ -22,7 +22,7 @@
                 if ( is_wp_error( $last_merge ) ): ?>
                     <div class="col">
                         <p>An error occurred fetching last merge data.</p>
-                        <p><?= $last_merge->get_error_message(); ?></p>
+                        <p><?= esc_html( $last_merge->get_error_message() ); ?></p>
                     </div>
         <?php    elseif ( false === $last_merge ): ?>
                     <div class="col">
@@ -30,27 +30,27 @@
                     </div>
         <?php    else: ?>
                     <div class="col-6">
-                        <p>Status: <strong><?= $last_merge[ "status" ]; ?></strong></p>
+                        <p>Status: <strong><?= esc_html( $last_merge[ "status" ] ); ?></strong></p>
                         <?php if ( !empty( $last_merge[ "error" ] ) ): ?>
-                            <p style="color:red"><strong>ERROR: <?= $last_merge[ "error" ]; ?></strong></p>
+                            <p style="color:red"><strong>ERROR: <?= esc_html( $last_merge[ "error" ] ); ?></strong></p>
                         <?php endif; ?>
-                        <p><?= $last_merge[ "merged_changes" ]; ?></p>
-                        <p><?= $last_merge[ "unmerged_changes" ]; ?></p>
+                        <p><?= esc_html( $last_merge[ "merged_changes" ] ); ?></p>
+                        <p><?= esc_html( $last_merge[ "unmerged_changes" ] ); ?></p>
                         <?php
                             $job_id = $last_merge[ "job_id" ];
                             $log_path = SEZ_Merge_Log::get_path( $job_id );
                             if ( file_exists( $log_path ) ){
-                                echo "<p><span data-job-id='{$job_id}' id='easysync-view-last-merge-log' class='easysync-hyperlink'>View Merge Log</span></p>";
+                                echo esc_html( "<p><span data-job-id='{$job_id}' id='easysync-view-last-merge-log' class='easysync-hyperlink'>View Merge Log</span></p>" );
                             }
                         ?>
                         
                     </div>
                     <div class="col-2"></div>
                     <div class="col-4" style="text-align:right">
-                        <p>Job ID: <?= $last_merge[ "job_id" ]; ?></p>
-                        <p>Started: <?= $last_merge[ "start_time" ]; ?></p>
-                        <p>Finished: <?= $last_merge[ "end_time" ]; ?></p>
-                        <p>Duration: <?= $last_merge[ "duration" ]; ?></p>
+                        <p>Job ID: <?= esc_html( $last_merge[ "job_id" ] ); ?></p>
+                        <p>Started: <?= esc_html( $last_merge[ "start_time" ] ); ?></p>
+                        <p>Finished: <?= esc_html( $last_merge[ "end_time" ] ); ?></p>
+                        <p>Duration: <?= esc_html( $last_merge[ "duration" ] ); ?></p>
                     </div>
         <?php    endif; ?>            
     </div>
@@ -75,13 +75,13 @@
                         ?>
                                 <tr>
                                     <td>
-                                        <label for="<?= $rule[ 'id' ]; ?>">
-                                            <p style="margin: 0"><?= $rule[ "id" ]; ?></p>
-                                            <p class="text-secondary"><?= $rule[ "description" ]; ?></p>
+                                        <label for="<?= esc_attr( $rule[ 'id' ] ); ?>">
+                                            <p style="margin: 0"><?= esc_html( $rule[ "id" ] ); ?></p>
+                                            <p class="text-secondary"><?= esc_html( $rule[ "description" ] ); ?></p>
                                         </label>
                                     </td>
                                     <td>
-                                        <input type="checkbox" name="<?= $rule[ 'id' ]; ?>" id="<?= $rule[ 'id' ]; ?>" <?= $rule[ "enabled" ] ? "checked" : ""; ?> />
+                                        <input type="checkbox" name="<?= esc_attr( $rule[ 'id' ] ); ?>" id="<?= esc_attr( $rule[ 'id' ] ); ?>" <?= $rule[ "enabled" ] ? "checked" : ""; ?> />
                                     </td>
                                 </tr>
                         <?php endforeach; ?>

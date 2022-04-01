@@ -126,7 +126,7 @@
                 return wp_send_json_error( $response );
             }
 
-            $job_id = $_POST[ "sez_job_id" ];
+            $job_id = sanitize_text_field( $_POST[ "sez_job_id" ] );
             
             $log = sez_get_merge_log( $job_id );
             if ( is_wp_error( $log ) ){
@@ -153,6 +153,7 @@
             if ( $merge_complete ){
                 $path = SEZ_Merge_Log::get_path( $job_id );
                 $response[ "additional_output" ] .= "<h3>Merge Complete!</h3><p>The console output for this merge is saved at {$path}.</p>";
+                $response[ "additional_output" ] = esc_html( $response[ "additional_output" ] );
             }
 
             return wp_send_json_success( $response );
@@ -170,7 +171,10 @@
                 }
 
                 // Create license key.
-                $response = SEZ_Remote_Api::create_license_key( $_POST[ "name" ], $_POST[ "email" ] );
+                $response = SEZ_Remote_Api::create_license_key( 
+                    sanitize_text_field( $_POST[ "name" ] ), 
+                    sanitize_text_field( $_POST[ "email" ] ) 
+                );
                 if ( is_wp_error( $response ) ){
                     return wp_send_json_error( $response );
                 }
@@ -238,7 +242,7 @@
 
 
         public static function save_settings(){
-            SEZ()->settings->merge_log_level = $_POST[ "easysync-merge-log-level" ];
+            SEZ()->settings->merge_log_level = sanitize_text_field( $_POST[ "easysync-merge-log-level" ] );
             SEZ()->settings->auto_delete_logs = isset( $_POST[ "easysync-auto-delete-logs" ] );
             SEZ()->auto_delete_change_files = isset( $_POST[ "easysync-auto-delete-change-files" ] );
             
@@ -254,13 +258,13 @@
                 return wp_send_json_error( new WP_Error( "run_advancedtool_error", "<span class='easysync-advancedtool-fail'>Missing required parameter.</span>" ) );
             }
 
-            if ( "reset_settings" === $_POST[ "easysync_advancedtools" ] ){
+            if ( "reset_settings" === sanitize_text_field( $_POST[ "easysync_advancedtools" ] ) ){
                 if ( is_wp_error( $result = SEZ_Advanced_Tools::reset_settings() ) ){
                     return wp_send_json_error( $result );
                 }
                 return wp_send_json( "<span class='easysync-advancedtool-success'>Successfully reset settings. Redirecting...</span>" );
             
-            } elseif ( "reset_data" === $_POST[ "easysync_advancedtools" ] ){
+            } elseif ( "reset_data" === sanitize_text_field( $_POST[ "easysync_advancedtools" ] ) ){
                 if ( is_wp_error( $result = SEZ_Advanced_Tools::reset_data() ) ){
                     return wp_send_json_error( $result );
                 }
@@ -278,7 +282,7 @@
 	        $response = SEZ_Remote_Api::get_registrations( $args );
 	        
 	        if ( is_wp_error( $response ) ){
-		        return wp_send_json( "<div class='row'><div class='col'><p class='easysync-response-fail'>An error occurred fetching site trackers. ERROR: " . $response->get_error_message() . "</p></div></div>" );
+		        return wp_send_json( esc_html( "<div class='row'><div class='col'><p class='easysync-response-fail'>An error occurred fetching site trackers. ERROR: " . $response->get_error_message() . "</p></div></div>" ) );
 	        }
 	        
 	        $sites = array();
@@ -291,7 +295,7 @@
 	        }
 	        
 	        if ( empty( $sites ) ){
-		        return wp_send_json( "<div class='row'><div class='col'><p>Site is currently not being tracked. Start tracking now! Follow the instructions below.</p></div></div>" );
+		        return wp_send_json( esc_html( "<div class='row'><div class='col'><p>Site is currently not being tracked. Start tracking now! Follow the instructions below.</p></div></div>" ) );
 	        }
 	        
 	        $output = "";
@@ -302,7 +306,7 @@
 		        
 		        $output .= "<div class='row'><div class='col-6'><h5><a href='//" . $site->staging_domain . "' target='_blank'>" . $site->staging_domain. "</a></h5><p>Tracking since: " . $since . "</p></div><div class='col-6 text-end'><p>Status: <strong>" . ucfirst( $site->status ) . "</strong></p></div></div>";
 	        }
-	        return wp_send_json( $output );
+	        return wp_send_json( esc_html( $output ) );
         }
     }
 
