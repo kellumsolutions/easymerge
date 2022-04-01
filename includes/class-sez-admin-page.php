@@ -3,7 +3,7 @@
     
     class SyncEasy_Admin_Page {
 
-        public static $handle = "easysync";
+        public static $handle = "easymerge";
 
         public static function init(){
             add_action( 'admin_menu', array( __CLASS__, 'setup_admin_page' ) );
@@ -20,8 +20,8 @@
         public static function setup_admin_page(){
             add_submenu_page(
                 "tools.php",
-                "EasySync Database Merging",
-                "EasySync",
+                "EasyMerge Database Merging",
+                "EasyMerge",
                 "manage_options",
                 self::$handle,
                 array( __CLASS__, "output" )
