@@ -30,12 +30,34 @@
                     </div>
         <?php    else: ?>
                     <div class="col-6">
-                        <p>Status: <strong><?php echo esc_html( $last_merge[ "status" ] ); ?></strong></p>
+                        <p>Status: 
+                            <strong class='easymerge-status-<?php echo $last_merge[ "status" ]; ?>'>
+                                <?php echo ucfirst( esc_html( $last_merge[ "status" ] ) ); ?>
+                            </strong>
+                        </p>
+
                         <?php if ( !empty( $last_merge[ "error" ] ) ): ?>
                             <p style="color:red"><strong>ERROR: <?php echo esc_html( $last_merge[ "error" ] ); ?></strong></p>
                         <?php endif; ?>
-                        <p><?php echo $last_merge[ "merged_changes" ]; ?></p>
-                        <p><?php echo $last_merge[ "unmerged_changes" ]; ?></p>
+
+                        <?php
+                            $merged_changes = $last_merge[ "merged_changes" ];
+                            if ( empty( $merged_changes ) ){
+                                echo "<p>Could not find any merged changes.</p>";
+                            
+                            } else {
+                                echo "<p>" . esc_html( $merged_changes ) . " merged changes. <span id='easysync-view-merged-details' class='easysync-hyperlink'>View details</span></p>";
+                            }
+
+                            $unmerged_changes = $last_merge[ "unmerged_changes" ];
+                            if ( empty( $unmerged_changes ) ){
+                                echo "<p>Could not find any unmerged changes.</p>";
+                            
+                            } else {
+                                echo "<p>" . esc_html( $unmerged_changes ) . " unmerged changes. <span id='easysync-view-unmerged-details' class='easysync-hyperlink'>View details</span></p>";
+                            }
+                        ?>
+
                         <?php
                             $job_id = $last_merge[ "job_id" ];
                             $log_path = SEZ_Merge_Log::get_path( $job_id );

@@ -163,7 +163,8 @@ button.easysync-dynamic.processing > span:nth-of-type(2){
     padding-left: 10px;
 }
 #easysync-nav-tab-advancedtools-content .easysync-advancedtool-response > .easysync-advancedtool-fail,
-.easysync-response-fail {
+.easysync-response-fail,
+.easymerge-status-fail {
     color:red;
 }
 #easysync-nav-tab-advancedtools-content .easysync-advancedtool-response > .easysync-advancedtool-success {
