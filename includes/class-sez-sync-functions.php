@@ -61,6 +61,7 @@
             $response = $response->extract();
             
             if ( is_wp_error( $response ) ){
+                SEZ_Sync::log( $log, "Unable live site data.", "WARNING" );
                 return $response;
 
             } else {
