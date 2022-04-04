@@ -465,12 +465,9 @@
                 ARRAY_A
             );
 
-            $merged_changes = "Could not find any merged changes.";
-            $unmerged_changes = "Could not find any unmerged changes.";
-
+            $merged_changes = 0;
+            $unmerged_changes = 0;
             if ( !empty( $results ) ){
-                $merged_changes = 0;
-                $unmerged_changes = 0;
                 foreach ( $results as $result ){
                     if ( "1" === $result[ "synced" ] || 1 === $result[ "synced" ] ){
                         $merged_changes++;
@@ -478,8 +475,6 @@
                         $unmerged_changes++;
                     }
                 }
-                $merged_changes = esc_html( $merged_changes ) . " merged changes. <span id='easysync-view-merged-details' class='easysync-hyperlink'>View details</span>";
-                $unmerged_changes = esc_html( $unmerged_changes ) . " unmerged changes. <span id='easysync-view-unmerged-details' class='easysync-hyperlink'>View details</span>";
             }
 
             $error = "";
@@ -514,7 +509,7 @@
                 "error" => $error,
                 "merged_changes" => $merged_changes,
                 "unmerged_changes" => $unmerged_changes,
-                "status" => $jobdata[ "status" ] === "fail" ? "<span style='color:red'>" . esc_html( ucfirst( $jobdata[ "status" ] ) ) . "</span>" : esc_html( ucfirst( $jobdata[ "status" ] ) ),
+                "status" => $jobdata[ "status" ],
                 "job_id" => $job_id
             );
         }

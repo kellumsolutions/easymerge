@@ -22,7 +22,7 @@
                 if ( is_wp_error( $last_merge ) ): ?>
                     <div class="col">
                         <p>An error occurred fetching last merge data.</p>
-                        <p><?= esc_html( $last_merge->get_error_message() ); ?></p>
+                        <p><?php echo esc_html( $last_merge->get_error_message() ); ?></p>
                     </div>
         <?php    elseif ( false === $last_merge ): ?>
                     <div class="col">
@@ -30,12 +30,34 @@
                     </div>
         <?php    else: ?>
                     <div class="col-6">
-                        <p>Status: <strong><?= esc_html( $last_merge[ "status" ] ); ?></strong></p>
+                        <p>Status: 
+                            <strong class='easymerge-status-<?php echo $last_merge[ "status" ]; ?>'>
+                                <?php echo ucfirst( esc_html( $last_merge[ "status" ] ) ); ?>
+                            </strong>
+                        </p>
+
                         <?php if ( !empty( $last_merge[ "error" ] ) ): ?>
-                            <p style="color:red"><strong>ERROR: <?= esc_html( $last_merge[ "error" ] ); ?></strong></p>
+                            <p style="color:red"><strong>ERROR: <?php echo esc_html( $last_merge[ "error" ] ); ?></strong></p>
                         <?php endif; ?>
-                        <p><?= $last_merge[ "merged_changes" ]; ?></p>
-                        <p><?= $last_merge[ "unmerged_changes" ]; ?></p>
+
+                        <?php
+                            $merged_changes = $last_merge[ "merged_changes" ];
+                            if ( empty( $merged_changes ) ){
+                                echo "<p>Could not find any merged changes.</p>";
+                            
+                            } else {
+                                echo "<p>" . esc_html( $merged_changes ) . " merged changes. <span id='easysync-view-merged-details' class='easysync-hyperlink'>View details</span></p>";
+                            }
+
+                            $unmerged_changes = $last_merge[ "unmerged_changes" ];
+                            if ( empty( $unmerged_changes ) ){
+                                echo "<p>Could not find any unmerged changes.</p>";
+                            
+                            } else {
+                                echo "<p>" . esc_html( $unmerged_changes ) . " unmerged changes. <span id='easysync-view-unmerged-details' class='easysync-hyperlink'>View details</span></p>";
+                            }
+                        ?>
+
                         <?php
                             $job_id = $last_merge[ "job_id" ];
                             $log_path = SEZ_Merge_Log::get_path( $job_id );
@@ -47,10 +69,10 @@
                     </div>
                     <div class="col-2"></div>
                     <div class="col-4" style="text-align:right">
-                        <p>Job ID: <?= esc_html( $last_merge[ "job_id" ] ); ?></p>
-                        <p>Started: <?= esc_html( $last_merge[ "start_time" ] ); ?></p>
-                        <p>Finished: <?= esc_html( $last_merge[ "end_time" ] ); ?></p>
-                        <p>Duration: <?= esc_html( $last_merge[ "duration" ] ); ?></p>
+                        <p>Job ID: <?php echo esc_html( $last_merge[ "job_id" ] ); ?></p>
+                        <p>Started: <?php echo esc_html( $last_merge[ "start_time" ] ); ?></p>
+                        <p>Finished: <?php echo esc_html( $last_merge[ "end_time" ] ); ?></p>
+                        <p>Duration: <?php echo esc_html( $last_merge[ "duration" ] ); ?></p>
                     </div>
         <?php    endif; ?>            
     </div>
@@ -75,13 +97,13 @@
                         ?>
                                 <tr>
                                     <td>
-                                        <label for="<?= esc_attr( $rule[ 'id' ] ); ?>">
-                                            <p style="margin: 0"><?= esc_html( $rule[ "id" ] ); ?></p>
-                                            <p class="text-secondary"><?= esc_html( $rule[ "description" ] ); ?></p>
+                                        <label for="<?php echo esc_attr( $rule[ 'id' ] ); ?>">
+                                            <p style="margin: 0"><?php echo esc_html( $rule[ "id" ] ); ?></p>
+                                            <p class="text-secondary"><?php echo esc_html( $rule[ "description" ] ); ?></p>
                                         </label>
                                     </td>
                                     <td>
-                                        <input type="checkbox" name="<?= esc_attr( $rule[ 'id' ] ); ?>" id="<?= esc_attr( $rule[ 'id' ] ); ?>" <?= $rule[ "enabled" ] ? "checked" : ""; ?> />
+                                        <input type="checkbox" name="<?php echo esc_attr( $rule[ 'id' ] ); ?>" id="<?php echo esc_attr( $rule[ 'id' ] ); ?>" <?php echo $rule[ "enabled" ] ? "checked" : ""; ?> />
                                     </td>
                                 </tr>
                         <?php endforeach; ?>
