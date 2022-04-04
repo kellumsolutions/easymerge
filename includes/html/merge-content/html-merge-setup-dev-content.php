@@ -2,9 +2,9 @@
 
 <div style="margin: 25px 0">
     <h5>Authorize Dev Site</h5>
-    <p>Authorize your dev site now, so you can begin syncing changes from <strong class="text-success"><?= esc_html( SEZ()->settings->live_site ); ?></strong>.</p>
-    <p>License Key: <strong class="text-success"><?= esc_html( SEZ()->settings->license ); ?></strong></p>
-    <p>Live Site: <strong class="text-success"><?= esc_html( SEZ()->settings->live_site ); ?></strong></p>
+    <p>Authorize your dev site now, so you can begin syncing changes from <strong class="text-success"><?php echo esc_html( SEZ()->settings->live_site ); ?></strong>.</p>
+    <p>License Key: <strong class="text-success"><?php echo esc_html( SEZ()->settings->license ); ?></strong></p>
+    <p>Live Site: <strong class="text-success"><?php echo esc_html( SEZ()->settings->live_site ); ?></strong></p>
     <br>
     <p id="error" style="color:red"></p>
     <button type="button" id="ezs_authorize" class="btn btn-success easysync-dynamic">

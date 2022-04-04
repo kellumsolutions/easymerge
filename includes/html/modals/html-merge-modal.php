@@ -2,7 +2,7 @@
 
 <!-- Sync modal -->
 <div id="sez_sync_modal" style="padding-top:100px">
-    <img class="sez-hidden" id="sez_sync_modal_close_button" src="<?= esc_attr( SEZ_ASSETS_URL ); ?>icons/3x/close-icon@3x.png" />
+    <img class="sez-hidden" id="sez_sync_modal_close_button" src="<?php echo esc_attr( SEZ_ASSETS_URL ); ?>icons/3x/close-icon@3x.png" />
     <div class="container" style="max-width:1000px">
         <div class="row">
             <div class="col-9">

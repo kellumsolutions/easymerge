@@ -19,20 +19,20 @@
                     <td>
                         <select name="easysync-merge-log-level">
                             <?php foreach( $log_levels as $level ): ?>
-                                <option value="<?= esc_attr( $level ); ?>" <?= strtoupper( SEZ()->settings->merge_log_level ) === $level ? "selected" : ""; ?>><?= esc_html( $level ); ?></option>
+                                <option value="<?php echo esc_attr( $level ); ?>" <?php echo strtoupper( SEZ()->settings->merge_log_level ) === $level ? "selected" : ""; ?>><?php echo esc_html( $level ); ?></option>
                             <?php endforeach; ?>
                         </select>
                     </td>
                 </tr>
                 <tr>
                     <td>Auto-Delete Logs<br><span class="text-secondary">Old logs files will be automatically deleted. Only the most recent log file will be retained.</span></td>
-                    <td><input type="checkbox" name="easysync-auto-delete-logs" <?= SEZ()->settings->auto_delete_logs ? "checked" : ""; ?>/></td>
+                    <td><input type="checkbox" name="easysync-auto-delete-logs" <?php echo SEZ()->settings->auto_delete_logs ? "checked" : ""; ?>/></td>
                 </tr>
                 <tr>
                     <td>Auto-Delete Change Files<br>
-                        <span class="text-secondary">Old change files will be automatically deleted. Only the most recent change file will be retained. Change files by default are located in <?= esc_html( trailingslashit( wp_upload_dir()[ "basedir" ] ) . "sez-changes" ); ?></span>
+                        <span class="text-secondary">Old change files will be automatically deleted. Only the most recent change file will be retained. Change files by default are located in <?php echo esc_html( trailingslashit( wp_upload_dir()[ "basedir" ] ) . "sez-changes" ); ?></span>
                     </td>
-                    <td><input type="checkbox" name="easysync-auto-delete-change-files" <?= SEZ()->settings->auto_delete_change_files ? "checked" : ""; ?>/></td>
+                    <td><input type="checkbox" name="easysync-auto-delete-change-files" <?php echo SEZ()->settings->auto_delete_change_files ? "checked" : ""; ?>/></td>
                 </tr>
             </tbody>
         </table>

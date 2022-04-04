@@ -9,9 +9,9 @@
     }
 ?>
 <div class="easysync-site-details">
-    <span>Current Environment: <span><?= esc_html( $site_env ); ?></span></span>
+    <span>Current Environment: <span><?php echo esc_html( $site_env ); ?></span></span>
     <?php if ( !empty( SEZ()->settings->dev_site ) ): ?>
-        <span>Live Site: <span><?= esc_html( SEZ()->settings->live_site ); ?></span></span>
+        <span>Live Site: <span><?php echo esc_html( SEZ()->settings->live_site ); ?></span></span>
     <?php endif; ?>
-    <span>License Key: <span><?= esc_html( SEZ()->settings->license ); ?></span></span>
+    <span>License Key: <span><?php echo esc_html( SEZ()->settings->license ); ?></span></span>
 </div>

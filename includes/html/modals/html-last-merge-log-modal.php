@@ -15,7 +15,7 @@
       </div>
       <div class="modal-body">
             <?php if ( $job_id ): ?>
-                <p>Job ID: <?= esc_html( $job_id ); ?></p>
+                <p>Job ID: <?php echo esc_html( $job_id ); ?></p>
             <?php endif; ?>
 
             <?php
@@ -28,7 +28,7 @@
                 ?>
                     <div class="easysync-last-merge-log-blackbox">
                         <div class="easysync-last-merge-log-blackbox-content">
-                            <?= $log->get_console_output(); ?>
+                            <?php echo $log->get_console_output(); ?>
                         </div>
                     </div>
                 <?php
