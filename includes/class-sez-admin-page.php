@@ -172,7 +172,7 @@
                 // Create license key.
                 $response = SEZ_Remote_Api::create_license_key( 
                     sanitize_text_field( $_POST[ "name" ] ), 
-                    sanitize_text_field( $_POST[ "email" ] ) 
+                    sanitize_email( $_POST[ "email" ] ) 
                 );
                 if ( is_wp_error( $response ) ){
                     return wp_send_json_error( $response );
