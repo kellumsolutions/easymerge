@@ -257,18 +257,32 @@
                 return wp_send_json_error( new WP_Error( "run_advancedtool_error", "<span class='easysync-advancedtool-fail'>Missing required parameter.</span>" ) );
             }
 
-            if ( "reset_settings" === sanitize_text_field( $_POST[ "easysync_advancedtools" ] ) ){
+            $action = sanitize_text_field( $_POST[ "easysync_advancedtools" ] );
+            if ( "reset_settings" === $action ){
                 if ( is_wp_error( $result = SEZ_Advanced_Tools::reset_settings() ) ){
                     return wp_send_json_error( $result );
                 }
                 return wp_send_json( "<span class='easysync-advancedtool-success'>Successfully reset settings. Redirecting...</span>" );
             
-            } elseif ( "reset_data" === sanitize_text_field( $_POST[ "easysync_advancedtools" ] ) ){
+            } elseif ( "reset_data" === $action ){
                 if ( is_wp_error( $result = SEZ_Advanced_Tools::reset_data() ) ){
                     return wp_send_json_error( $result );
                 }
                 return wp_send_json( "<span class='easysync-advancedtool-success'>Successfully reset data. Redirecting...</span>" );
+            
+            } elseif ( "delete_change_files" === $action ){
+                if ( is_wp_error( $result = SEZ_Advanced_Tools::delete_change_files() ) ){
+                    return wp_send_json_error( $result );
+                }
+                return wp_send_json( "<span class='easysync-advancedtool-success'>Successfully deleted change files.</span>" );
+
+            } elseif ( "delete_merge_logs" === $action ){
+                if ( is_wp_error( $result = SEZ_Advanced_Tools::delete_merge_logs() ) ){
+                    return wp_send_json_error( $result );
+                }
+                return wp_send_json( "<span class='easysync-advancedtool-success'>Successfully deleted merge logs.</span>" );
             }
+
             return wp_send_json_error( new WP_Error( "run_advancedtool_error", "<span class='easysync-advancedtool-fail'>EOL error occurred. Please try again later.</span>" ) );
         }
         

@@ -186,17 +186,9 @@
     if ( !function_exists( 'sez_export_db_to_zip' ) ){
         function sez_export_db_to_zip(){
             $to_dir = trailingslashit( wp_upload_dir()[ "basedir" ] ) . "easymerge-dump";
-            if ( is_dir( $to_dir ) ){
-                $it = new RecursiveDirectoryIterator( $to_dir, RecursiveDirectoryIterator::SKIP_DOTS );
-                $files = new RecursiveIteratorIterator( $it, RecursiveIteratorIterator::CHILD_FIRST );
-                foreach( $files as $file ) {
-                    if ( $file->isDir() ){
-                        rmdir( $file->getRealPath() );
-                    } else {
-                        unlink ($file->getRealPath() );
-                    }
-                }
-                rmdir( $to_dir );
+            $result = sez_recursive_rmdir( $to_dir );
+            if ( is_wp_error( $result ) ){
+                return $result;
             }
             mkdir( $to_dir );
 
@@ -212,6 +204,30 @@
                 return $result;
             }
             return trailingslashit( wp_upload_dir()[ "baseurl" ] ) . "easymerge-dump/dump.zip";
+        }
+    }
+
+
+    if ( !function_exists( 'sez_recursive_rmdir' ) ){
+        function sez_recursive_rmdir( $to_dir ){
+            if ( is_dir( $to_dir ) ){
+                try {
+                    $it = new RecursiveDirectoryIterator( $to_dir, RecursiveDirectoryIterator::SKIP_DOTS );
+                    $files = new RecursiveIteratorIterator( $it, RecursiveIteratorIterator::CHILD_FIRST );
+                    foreach( $files as $file ) {
+                        if ( $file->isDir() ){
+                            rmdir( $file->getRealPath() );
+                        } else {
+                            unlink ( $file->getRealPath() );
+                        }
+                    }
+                    rmdir( $to_dir );
+
+                } catch( Exception $e ){
+                    return new WP_Error( "sez_recursive_rmdir_error", "Error deleting directory {$dir}. ERR: " . $e->getMessage() );
+                }
+            }
+            return true;
         }
     }
 

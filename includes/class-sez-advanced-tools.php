@@ -26,5 +26,25 @@
             }            
             return true;
         }
+
+
+        public static function delete_change_files(){
+            $dir = trailingslashit( wp_upload_dir()[ "basedir" ] ) . "sez-changes";
+
+            if ( is_wp_error( $result = sez_recursive_rmdir( $dir ) ) ){
+                return $result;
+            }
+            return true;
+        }
+
+
+        public static function delete_merge_logs(){
+            $dir = trailingslashit( wp_upload_dir()[ "basedir" ] ) . "sez-logs";
+
+            if ( is_wp_error( $result = sez_recursive_rmdir( $dir ) ) ){
+                return $result;
+            }
+            return true;
+        }
     }
 ?>

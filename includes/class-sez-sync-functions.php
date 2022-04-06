@@ -143,15 +143,6 @@
             }
             SEZ_Sync::log( $log, "{$changes_with_rules} pending changes with matched rule." );
 
-            //     // Get all rules in priority order.
-            //     $enabled_rules = array();
-            //     $rules = SEZ_Rules::get_rule_ids_by_priority();
-            //     foreach ( $rules as $rule ){
-            //         if ( $rule[ "enabled" ] ){
-            //             $enabled_rules[ $rule[ "id" ] ] = array();
-            //         }
-            //     }
-
             // Write changes to file on disk.
             $base = trailingslashit( wp_upload_dir()[ "basedir" ] ) . "sez-changes";
             if ( false === is_dir( $base ) ){
