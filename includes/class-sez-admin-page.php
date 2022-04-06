@@ -281,7 +281,7 @@
 	        $response = SEZ_Remote_Api::get_registrations( $args );
 	        
 	        if ( is_wp_error( $response ) ){
-		        return wp_send_json( esc_html( "<div class='row'><div class='col'><p class='easysync-response-fail'>An error occurred fetching site trackers. ERROR: " . $response->get_error_message() . "</p></div></div>" ) );
+		        return wp_send_json( "<div class='row'><div class='col'><p class='easysync-response-fail'>An error occurred fetching site trackers. ERROR: " . esc_html( $response->get_error_message() ) . "</p></div></div>" );
 	        }
 	        
 	        $sites = array();
@@ -294,7 +294,7 @@
 	        }
 	        
 	        if ( empty( $sites ) ){
-		        return wp_send_json( esc_html( "<div class='row'><div class='col'><p>Site is currently not being tracked. Start tracking now! Follow the instructions below.</p></div></div>" ) );
+		        return wp_send_json( "<div class='row'><div class='col'><p>Site is currently not being tracked. Start tracking now! Follow the instructions below.</p></div></div>" );
 	        }
 	        
 	        $output = "";
@@ -303,9 +303,9 @@
 		        $since = $site->created_at;
 		        $since = date( "D, M d, Y h:i:s a", strtotime( $since ) );
 		        
-		        $output .= "<div class='row'><div class='col-6'><h5><a href='//" . $site->staging_domain . "' target='_blank'>" . $site->staging_domain. "</a></h5><p>Tracking since: " . $since . "</p></div><div class='col-6 text-end'><p>Status: <strong>" . ucfirst( $site->status ) . "</strong></p></div></div>";
+		        $output .= "<div class='row'><div class='col-6'><h5><a href='//" . esc_html( $site->staging_domain ) . "' target='_blank'>" . esc_html( $site->staging_domain ). "</a></h5><p>Tracking since: " . esc_html( $since ) . "</p></div><div class='col-6 text-end'><p>Status: <strong>" . esc_html( ucfirst( $site->status ) ) . "</strong></p></div></div>";
 	        }
-	        return wp_send_json( esc_html( $output ) );
+	        return wp_send_json( $output );
         }
     }
 
