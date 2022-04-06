@@ -20,6 +20,12 @@ class Test_SEZ_Functions extends WP_UnitTestCase {
         $this->assertTrue( $results );
     }
 
+    function test_export_db_to_zip(){
+        $result = sez_export_db_to_zip();
+        $this->assertTrue( false === is_wp_error( $result ) );
+        //$this->assertTrue( file_exists( $result ) );
+    }
+
     function test_prepare_dir(){
 
         $this->ezsa_rmdir( untrailingslashit( ABSPATH ) . "/test-dir" );

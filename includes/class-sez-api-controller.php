@@ -35,6 +35,18 @@
                     'permission_callback' => function(){ return true; }
                 )
             );
+
+
+            register_rest_route( 
+                self::$base . "/" . self::$version, 
+                "clean", 
+                array(
+                    'methods' => 'POST',
+                    'callback' => array( __CLASS__, 'clean' ),
+                    'args' => array(),
+                    'permission_callback' => function(){ return true; }
+                )
+            );
         }
 
 
@@ -45,12 +57,8 @@
             }
 
             $license_key = sanitize_text_field( $_POST[ "license_key" ] );
-
-            // Validate license key.
-//             $sez_settings = get_option( 'sez_site_settings' );
             
             if ( $license_key !== SEZ()->settings->license ){
-//             if ( empty( $sez_settings ) || !isset( $sez_settings[ "license"] ) || $sez_settings[ "license"] !== $license_key ){
                 $err = new WP_Error( "export_db_error", "Invalid license key." );
                 return rest_ensure_response( $err );
             } 
@@ -82,6 +90,36 @@
 
             $result = sez_describe_db();
             return rest_ensure_response( $result );
+        }
+
+
+        public static function clean(){
+            if ( !isset( $_POST[ "license_key" ] ) ){
+                $err = new WP_Error( "clean_error", "License key is required." );
+                return rest_ensure_response( $err );
+            }
+
+            $license_key = sanitize_text_field( $_POST[ "license_key" ] );
+            
+            if ( $license_key !== SEZ()->settings->license ){
+                $err = new WP_Error( "clean_error", "Invalid license key." );
+                return rest_ensure_response( $err );
+            } 
+
+            $dir = trailingslashit( wp_upload_dir()[ "basedir" ] ) . "easymerge-dump";
+            if ( is_dir( $dir ) ){
+                $it = new RecursiveDirectoryIterator( $dir, RecursiveDirectoryIterator::SKIP_DOTS );
+                $files = new RecursiveIteratorIterator( $it, RecursiveIteratorIterator::CHILD_FIRST );
+                foreach( $files as $file ) {
+                    if ( $file->isDir() ){
+                        rmdir( $file->getRealPath() );
+                    } else {
+                        unlink ($file->getRealPath() );
+                    }
+                }
+                rmdir( $dir );
+            }
+            return rest_ensure_response( true );
         }
     }
 

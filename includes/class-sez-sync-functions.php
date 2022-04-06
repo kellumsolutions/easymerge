@@ -365,6 +365,17 @@
         }
 
 
+        public static function clean( $job_id, $log ){
+            SEZ_Sync::log( $log, "Deleting dump from live site." );
+
+            $license_key = SEZ()->sync->get_job_param( $job_id, "license_key" );
+            $live_domain = SEZ()->sync->get_job_param( $job_id, "live_site" );
+
+            // Delete created live site dump file.
+            return self::clean_live_site( $live_domain, $license_key );
+        }
+
+
         public static function done( $job_id, $log ){
             SEZ_Sync::log( $log, "Done." );
         }
@@ -404,6 +415,26 @@
                 return $response;
             }
             return $response->url;
+        }
+
+
+        public static function clean_live_site( $live_domain, $license_key ){
+            $endpoint = "{$live_domain}/wp-json/easysync/v1/clean";
+
+            $response = wp_remote_post(
+                $endpoint,
+                array(
+                    "body" => array( "license_key" => $license_key )
+                )
+            );
+
+            $response = new SEZ_Api_Response( $response );
+            $response = $response->extract();
+            
+            if ( is_wp_error( $response ) ){
+                return $response;
+            }
+            return true;
         }
     }
 
