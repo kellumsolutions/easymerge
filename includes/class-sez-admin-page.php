@@ -243,7 +243,7 @@
         public static function save_settings(){
             SEZ()->settings->merge_log_level = sanitize_text_field( $_POST[ "easysync-merge-log-level" ] );
             SEZ()->settings->auto_delete_logs = isset( $_POST[ "easysync-auto-delete-logs" ] );
-            SEZ()->auto_delete_change_files = isset( $_POST[ "easysync-auto-delete-change-files" ] );
+            SEZ()->settings->auto_delete_change_files = isset( $_POST[ "easysync-auto-delete-change-files" ] );
             
             if ( is_wp_error( $result = SEZ()->settings->save() ) ){
                 wp_send_json_error( $result );

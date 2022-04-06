@@ -357,13 +357,22 @@
 
 
         public static function clean( $job_id, $log ){
-            SEZ_Sync::log( $log, "Deleting dump from live site." );
-
             $license_key = SEZ()->sync->get_job_param( $job_id, "license_key" );
             $live_domain = SEZ()->sync->get_job_param( $job_id, "live_site" );
 
+            if ( SEZ()->settings->auto_delete_change_files ){
+                SEZ_Sync::log( $log, "Deleting change files." );
+                if ( is_wp_error( $result = SEZ_Advanced_Tools::delete_change_files() ) ){
+                    SEZ_Sync::log( $log, "Could not delete change files. Error message: " . esc_html( $result->get_error_message() ) . ".", "WARNING" );
+                }
+            }
+
             // Delete created live site dump file.
-            return self::clean_live_site( $live_domain, $license_key );
+            SEZ_Sync::log( $log, "Deleting dump from live site." );
+            if ( is_wp_error( $result = self::clean_live_site( $live_domain, $license_key ) ) ){
+                SEZ_Sync::log( $log, "Unable to delete live site dump. Error message: " . esc_html( $result->get_error_message() ) . ".", "WARNING" );
+            }
+            return true;
         }
 
 

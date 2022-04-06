@@ -14,11 +14,15 @@
 
         private $console_output = "";
 
+        private $processing_error = false;
+
         public function __construct( $job_id ){
             $this->job_id = $job_id;
 
             // Read log and populate class properties.
-            $this->process();
+            if ( is_wp_error( $result = $this->process() ) ){
+                $this->processing_error = $result;
+            }
         }
 
 
@@ -117,6 +121,9 @@
 
 
         public function get_console_output(){
+            if ( false !== $this->processing_error ){
+                return "<p>Having issues reading the merge log file. However, the merge is going smoothly. We are working to display the merge output. ERROR: " . $this->processing_error->get_error_message() . ".<p>";
+            }
             return $this->console_output;
         }
 
@@ -150,6 +157,12 @@
 
 
         public static function create( $job_id ){
+            // If auto-delete logs is set, delete any existing logs before creating a new one.
+            // If an error is thrown, don't do anything.
+            if ( SEZ()->settings->auto_delete_logs ){
+                SEZ_Advanced_Tools::delete_merge_logs();
+            }
+
             $base = trailingslashit( wp_upload_dir()[ "basedir" ] ) . "sez-logs";
             if ( false === is_dir( $base ) ){
                 if ( false === mkdir( $base ) ){
