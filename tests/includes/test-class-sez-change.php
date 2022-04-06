@@ -33,7 +33,6 @@ class Test_SEZ_Change extends WP_UnitTestCase {
         $data = array( "1", "1", "travis", "test@email.com", "test@site.com", "174.74.74.74", "2022-01-05 02:08:57", "2022-01-05 02:08:57", "Just making change.", "0", "1", "Mozilla", "comment", 0, "1/n");
         $change = new SEZ_Change( $operation, $table, $primary_key, $data );
         $rule = $change->find_rule();
-
         $this->assertTrue( "include_all_comments" === $rule );
 
         $operation = "UPDATE";
@@ -42,8 +41,7 @@ class Test_SEZ_Change extends WP_UnitTestCase {
         $data = array( "12", "3", "", "", "test content", "sample post title", "", "pending", "closed", "closed", "", "sample-post-title", "", "", "", "", "", "0", "12", "0", "page", "", "5" );
         $change = new SEZ_Change( $operation, $table, $primary_key, $data );
         $rule = $change->find_rule();
-       
-        $this->assertTrue( "ezsw_include_all_order_posts" === $rule ); 
+        $this->assertTrue( "ezsw_include_all_posts_pages" === $rule ); 
 
         $data[20] = "product";
         $change = new SEZ_Change( $operation, $table, $primary_key, $data );
@@ -62,7 +60,7 @@ class Test_SEZ_Change extends WP_UnitTestCase {
                 "description" => "Allows test rules.",
                 "rules" => array(
                     array(
-                        "id" => "ezsw_include_all_order_posts",
+                        "id" => "ezsw_include_all_posts_pages",
                         "table" => $wpdb->posts,
                         // "policy" => "include",
                         "conditions" => array(
@@ -74,7 +72,7 @@ class Test_SEZ_Change extends WP_UnitTestCase {
                         )
                     ),
                     array(
-                        "id" => "ezsw_include_all_order_postmeta",
+                        "id" => "ezsw_include_all_postmeta",
                         "table" => $wpdb->postmeta,
                         // "policy" => "include",
                         "conditions" => array()

@@ -10,13 +10,11 @@ class Test_SEZ_Sync_Functions extends WP_UnitTestCase {
         global $wpdb;
         SEZ_Install::install();
 
-        $job_id = "test-job-id";
-        $log = ABSPATH . "/" . $job_id . ".log";
-        $changes_file = ABSPATH . "/" . $job_id . ".json";
+        $job_id = SEZ()->sync->create_job();
+        $path = SEZ_Merge_Log::get_path( $job_id );
+        $log = sez_get_merge_log( $job_id );
 
-        if ( file_exists( $log ) ){
-            unlink( $log );
-        }
+        $changes_file = ABSPATH . "/" . $job_id . ".json";
 
         if ( file_exists( $changes_file ) ){
             unlink( $changes_file );
@@ -46,6 +44,10 @@ class Test_SEZ_Sync_Functions extends WP_UnitTestCase {
 
         $results = $wpdb->get_results( "SELECT * FROM {$wpdb->comments}" );
         $this->assertTrue( 1 === count( $results ) );
+
+        if ( file_exists( $path ) ){
+            unlink( $path );
+        }
     }
 
 

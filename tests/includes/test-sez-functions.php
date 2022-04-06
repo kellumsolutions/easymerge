@@ -47,6 +47,7 @@ class Test_SEZ_Functions extends WP_UnitTestCase {
     function test_create_zip(){
         $dir = untrailingslashit( ABSPATH ) . "/test-zip";
         $this->ezsa_rmdir( $dir );
+        mkdir( $dir );
         //$dir = sez_prepare_dir( $dir ); 
         sez_export_db( $dir ); 
         $result = sez_create_zip( "why_hello.zip", $dir, ABSPATH );
@@ -58,8 +59,8 @@ class Test_SEZ_Functions extends WP_UnitTestCase {
         global $wpdb;
 
         $result = sez_describe_db();
-        $this->assertTrue( 0 === (int)$result[ $wpdb->users ][ "pk_index" ] );
-        $this->assertTrue( 10 === (int)$result[ $wpdb->users ][ "field_count" ] );
+        $this->assertTrue( 0 === (int)$result[ "tables" ][ $wpdb->users ][ "pk_index" ] );
+        $this->assertTrue( 10 === (int)$result[ "tables" ][ $wpdb->users ][ "field_count" ] );
     }
 
 
@@ -85,7 +86,7 @@ class Test_SEZ_Functions extends WP_UnitTestCase {
         update_option( $job_id, $data );
         
         $result = sez_save_jobdata( $job_id );
-        $this->assertTrue( true === $result );
+        $this->assertTrue( 1 === $result );
 
         $result = $wpdb->get_results( "select * from {$wpdb->prefix}sez_jobs where job_id = '{$job_id}'", ARRAY_A );
         $this->assertTrue( "success" === $result[0][ "status" ] );
@@ -102,7 +103,7 @@ class Test_SEZ_Functions extends WP_UnitTestCase {
         update_option( $job_id, $data );
         
         $result = sez_save_jobdata( $job_id );
-        $this->assertTrue( true === $result );
+        $this->assertTrue( 1 === $result );
 
         $result = $wpdb->get_results( "select * from {$wpdb->prefix}sez_jobs where job_id = '{$job_id}'", ARRAY_A );
         $this->assertTrue( "fail" === $result[0][ "status" ] );
