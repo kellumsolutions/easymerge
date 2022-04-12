@@ -18,10 +18,6 @@ EasyMerge is the ultimate Wordpress database merging tool. EasyMerge allows you 
 - **Clone the production site to the development site.** Use the Wordpress clone/migration plugin of your choice. Just ensure the development site is an exact clone of the production site.
 - **Begin syncing with the production site.** Syncing the development site to the live site is as easy as the click of a button.
 
-== Screenshots ==
-== Changelog ==
-== Upgrade Notice ==
-
 == Installation ==
 
 = Minimum Requirements =
@@ -29,6 +25,21 @@ EasyMerge is the ultimate Wordpress database merging tool. EasyMerge allows you 
 * PHP 7.2 or greater is recommended
 * MySQL 5.6 or greater is recommended
 
-== Donate ==
+= Automatic installation =
 
-== Frequently Asked Questions ==
+Automatic installation is the easiest option -- WordPress will handle the file transfer, and you won’t need to leave your web browser. To do an automatic install of EasyMerge, log in to your WordPress dashboard, navigate to the Plugins menu, and click “Add New.”
+ 
+In the search field type “EasyMerge” then click “Search Plugins.” Once you’ve found us, you can install by clicking “Install Now,” and WordPress will take it from there.
+
+= Manual installation =
+
+Manual installation method requires downloading the EasyMerge plugin and uploading it to your web server via your favorite FTP application. The WordPress codex contains [instructions on how to do this here](https://wordpress.org/support/article/managing-plugins/#manual-plugin-installation).
+
+= Updating =
+
+Automatic updates should work smoothly, but we still recommend you back up your site.
+
+== Changelog ==
+
+No changes for changelog.
+
