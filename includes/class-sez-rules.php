@@ -71,8 +71,10 @@
             $enabled_rule_map = array();
             
             // Create hash table.
-            foreach ( $rule_opts[ "enabled" ] as $enabled_rule_id ){
-                $enabled_rule_map[ $enabled_rule_id ] = "1";
+            if ( isset( $rule_opts[ "enabled" ] ) ){
+                foreach ( $rule_opts[ "enabled" ] as $enabled_rule_id ){
+                    $enabled_rule_map[ $enabled_rule_id ] = "1";
+                }
             }
 
             foreach ( $rules as &$rule ){

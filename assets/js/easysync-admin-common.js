@@ -112,6 +112,10 @@ jQuery( document ).ready( function( $ ){
                 action = "reset_settings";
             } else if ( self.hasClass( "easysync-reset-data" ) ){
                 action = "reset_data";
+            } else if ( self.hasClass( "easysync-delete-change-files" ) ){
+                action = "delete_change_files";
+            } else if ( self.hasClass( "easysync-delete-merge-logs" ) ){
+                action = "delete_merge_logs";
             }
 
             var response_el = self.next( ".easysync-advancedtool-response" );
@@ -132,7 +136,9 @@ jQuery( document ).ready( function( $ ){
                             response_el.html( wp_error_message( response ) );
                         } else {
                             response_el.html( response );
-                            window.location.reload();
+                            if ( "reset_settings" == action || "reset_data" == action ){
+                                window.location.reload();
+                            }
                         }
                     
                     } else {

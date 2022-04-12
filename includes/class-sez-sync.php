@@ -72,9 +72,13 @@
                 array(
                     array( "action" => "perform_changes", "job_id" => $job_id ),
                 ),
-                // // Queue 7
+                // Queue 7
                 array(
                     array( "action" => "perform_adjustments", "job_id" => $job_id ),
+                ),
+                // Queue 8
+                array(
+                    array( "action" => "clean", "job_id" => $job_id ),
                     array( "action" => "done", "job_id" => $job_id )
                 )
             );

@@ -34,6 +34,8 @@
             // Add back table prefix if needed.
             if ( !in_array( $table, $tables ) ){
                 $this->table_w_prefix = $wpdb->prefix . $table;
+            } else {
+                $this->table_w_prefix = $table;
             }
         }
 

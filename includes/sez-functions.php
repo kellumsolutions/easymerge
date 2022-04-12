@@ -80,26 +80,9 @@
 
     if ( !function_exists( 'sez_export_db' ) ){
         function sez_export_db( $to_dir ){
-            global $wpdb, $wp_filesystem;
+            global $wpdb;
 
-            if ( !$wp_filesystem ){
-                require_once( trailingslashit( ABSPATH ) . "wp-admin/includes/file.php" );
-                if ( !WP_Filesystem() ){
-                    return new WP_Error( "error exporting db", "Incorrect file permissions." );
-                }                
-            }
-
-            $path = $wp_filesystem->find_folder( $to_dir );
-
-            if ( !$wp_filesystem->is_dir( $path ) ){
-                if ( !$wp_filesystem->mkdir( $path ) ){
-                    return new WP_Error( "error exporting db", "Could not create path." );
-                }
-            } elseif ( !$wp_filesystem->is_writable( $path ) ){
-                return new WP_Error( "error exporting db", "Directory {$path} is not writable." );
-            }
-
-            $path = untrailingslashit( $path );
+            $path = untrailingslashit( $to_dir );
             $tables = sez_get_tables();
 
             if ( is_wp_error( $tables ) ){
@@ -111,7 +94,7 @@
                 $headers = implode( "\t", $headers );
                 
                 // Write headers to file.
-                $wp_filesystem->put_contents( "{$path}/{$table}.txt", $headers . "\n" );
+                file_put_contents( "{$path}/{$table}.txt", $headers . "\n" );
 
                 $results = $wpdb->get_results( "SELECT * FROM {$table}", ARRAY_A );
                 if ( $results ){
@@ -202,15 +185,12 @@
 
     if ( !function_exists( 'sez_export_db_to_zip' ) ){
         function sez_export_db_to_zip(){
-            $tmp_dir = sez_prepare_dir( SEZ_TMP_DIR );
-
-            if ( is_wp_error( $tmp_dir ) ){
-                return $tmp_dir;
+            $to_dir = trailingslashit( wp_upload_dir()[ "basedir" ] ) . "easymerge-dump";
+            $result = sez_recursive_rmdir( $to_dir );
+            if ( is_wp_error( $result ) ){
+                return $result;
             }
-
-            $unique = bin2hex( random_bytes( 12 ) );
-            $to_dir = untrailingslashit( $tmp_dir ) . "/" . $unique;
-            $to_dir = sez_prepare_dir( $to_dir );
+            mkdir( $to_dir );
 
             // Export database to text files.
             $result = sez_export_db( $to_dir );
@@ -223,7 +203,31 @@
             if ( is_wp_error( $result ) ){
                 return $result;
             }
-            return trailingslashit( SEZ_TMP_URL ) . $unique . "/dump.zip";
+            return trailingslashit( wp_upload_dir()[ "baseurl" ] ) . "easymerge-dump/dump.zip";
+        }
+    }
+
+
+    if ( !function_exists( 'sez_recursive_rmdir' ) ){
+        function sez_recursive_rmdir( $to_dir ){
+            if ( is_dir( $to_dir ) ){
+                try {
+                    $it = new RecursiveDirectoryIterator( $to_dir, RecursiveDirectoryIterator::SKIP_DOTS );
+                    $files = new RecursiveIteratorIterator( $it, RecursiveIteratorIterator::CHILD_FIRST );
+                    foreach( $files as $file ) {
+                        if ( $file->isDir() ){
+                            rmdir( $file->getRealPath() );
+                        } else {
+                            unlink ( $file->getRealPath() );
+                        }
+                    }
+                    rmdir( $to_dir );
+
+                } catch( Exception $e ){
+                    return new WP_Error( "sez_recursive_rmdir_error", "Error deleting directory {$dir}. ERR: " . $e->getMessage() );
+                }
+            }
+            return true;
         }
     }
 

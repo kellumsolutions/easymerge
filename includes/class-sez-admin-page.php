@@ -243,7 +243,7 @@
         public static function save_settings(){
             SEZ()->settings->merge_log_level = sanitize_text_field( $_POST[ "easysync-merge-log-level" ] );
             SEZ()->settings->auto_delete_logs = isset( $_POST[ "easysync-auto-delete-logs" ] );
-            SEZ()->auto_delete_change_files = isset( $_POST[ "easysync-auto-delete-change-files" ] );
+            SEZ()->settings->auto_delete_change_files = isset( $_POST[ "easysync-auto-delete-change-files" ] );
             
             if ( is_wp_error( $result = SEZ()->settings->save() ) ){
                 wp_send_json_error( $result );
@@ -257,18 +257,32 @@
                 return wp_send_json_error( new WP_Error( "run_advancedtool_error", "<span class='easysync-advancedtool-fail'>Missing required parameter.</span>" ) );
             }
 
-            if ( "reset_settings" === sanitize_text_field( $_POST[ "easysync_advancedtools" ] ) ){
+            $action = sanitize_text_field( $_POST[ "easysync_advancedtools" ] );
+            if ( "reset_settings" === $action ){
                 if ( is_wp_error( $result = SEZ_Advanced_Tools::reset_settings() ) ){
                     return wp_send_json_error( $result );
                 }
                 return wp_send_json( "<span class='easysync-advancedtool-success'>Successfully reset settings. Redirecting...</span>" );
             
-            } elseif ( "reset_data" === sanitize_text_field( $_POST[ "easysync_advancedtools" ] ) ){
+            } elseif ( "reset_data" === $action ){
                 if ( is_wp_error( $result = SEZ_Advanced_Tools::reset_data() ) ){
                     return wp_send_json_error( $result );
                 }
                 return wp_send_json( "<span class='easysync-advancedtool-success'>Successfully reset data. Redirecting...</span>" );
+            
+            } elseif ( "delete_change_files" === $action ){
+                if ( is_wp_error( $result = SEZ_Advanced_Tools::delete_change_files() ) ){
+                    return wp_send_json_error( $result );
+                }
+                return wp_send_json( "<span class='easysync-advancedtool-success'>Successfully deleted change files.</span>" );
+
+            } elseif ( "delete_merge_logs" === $action ){
+                if ( is_wp_error( $result = SEZ_Advanced_Tools::delete_merge_logs() ) ){
+                    return wp_send_json_error( $result );
+                }
+                return wp_send_json( "<span class='easysync-advancedtool-success'>Successfully deleted merge logs.</span>" );
             }
+
             return wp_send_json_error( new WP_Error( "run_advancedtool_error", "<span class='easysync-advancedtool-fail'>EOL error occurred. Please try again later.</span>" ) );
         }
         
@@ -281,7 +295,7 @@
 	        $response = SEZ_Remote_Api::get_registrations( $args );
 	        
 	        if ( is_wp_error( $response ) ){
-		        return wp_send_json( esc_html( "<div class='row'><div class='col'><p class='easysync-response-fail'>An error occurred fetching site trackers. ERROR: " . $response->get_error_message() . "</p></div></div>" ) );
+		        return wp_send_json( "<div class='row'><div class='col'><p class='easysync-response-fail'>An error occurred fetching site trackers. ERROR: " . esc_html( $response->get_error_message() ) . "</p></div></div>" );
 	        }
 	        
 	        $sites = array();
@@ -294,7 +308,7 @@
 	        }
 	        
 	        if ( empty( $sites ) ){
-		        return wp_send_json( esc_html( "<div class='row'><div class='col'><p>Site is currently not being tracked. Start tracking now! Follow the instructions below.</p></div></div>" ) );
+		        return wp_send_json( "<div class='row'><div class='col'><p>Site is currently not being tracked. Start tracking now! Follow the instructions below.</p></div></div>" );
 	        }
 	        
 	        $output = "";
@@ -303,9 +317,9 @@
 		        $since = $site->created_at;
 		        $since = date( "D, M d, Y h:i:s a", strtotime( $since ) );
 		        
-		        $output .= "<div class='row'><div class='col-6'><h5><a href='//" . $site->staging_domain . "' target='_blank'>" . $site->staging_domain. "</a></h5><p>Tracking since: " . $since . "</p></div><div class='col-6 text-end'><p>Status: <strong>" . ucfirst( $site->status ) . "</strong></p></div></div>";
+		        $output .= "<div class='row'><div class='col-6'><h5><a href='//" . esc_html( $site->staging_domain ) . "' target='_blank'>" . esc_html( $site->staging_domain ). "</a></h5><p>Tracking since: " . esc_html( $since ) . "</p></div><div class='col-6 text-end'><p>Status: <strong>" . esc_html( ucfirst( $site->status ) ) . "</strong></p></div></div>";
 	        }
-	        return wp_send_json( esc_html( $output ) );
+	        return wp_send_json( $output );
         }
     }
 
