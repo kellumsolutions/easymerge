@@ -19,6 +19,8 @@
 
         private $file_name = "sez_settings.json";
 
+        private $option_name = "easymerge_settings";
+
 
         public function __construct(){
             
@@ -33,12 +35,18 @@
                 $data = file_get_contents( $file );
                 $data = json_decode( $data, true );
 
-                $this->license = isset( $data[ "license" ] ) ? sanitize_text_field( $data[ "license" ] ) : "";
+                // $this->license = isset( $data[ "license" ] ) ? sanitize_text_field( $data[ "license" ] ) : "";
                 $this->live_site = isset( $data[ "live_site" ] ) ? sanitize_text_field( $data[ "live_site" ] ) : "";
                 $this->dev_site = isset( $data[ "dev_site" ] ) ? sanitize_text_field( $data[ "dev_site" ] ) : "";
                 $this->merge_log_level = isset( $data[ "merge_log_level" ] ) ? sanitize_text_field( $data[ "merge_log_level" ] ) : "INFO";
                 $this->auto_delete_logs = isset( $data[ "auto_delete_logs" ] ) ? sanitize_text_field( $data[ "auto_delete_logs" ] ) : false;
                 $this->auto_delete_change_files = isset( $data[ "auto_delete_change_files" ] ) ? sanitize_text_field( $data[ "auto_delete_change_files" ] ) : true;
+            }
+
+            // LIFE-56: Move license key out of sez_settings.json file.
+            $option = get_option( $this->option_name );
+            if ( false !== $option ){
+                $this->license = isset( $option[ "license" ] ) ? sanitize_text_field( $option[ "license" ] ) : "";
             }
         }
 
@@ -46,7 +54,7 @@
         public function save(){
             $file = trailingslashit( wp_upload_dir()[ "basedir" ] ) . $this->file_name;
             $data = array(
-                "license" => $this->license,
+                // "license" => $this->license,
                 "live_site" => $this->live_site,
                 "dev_site" => $this->dev_site,
                 "merge_log_level" => in_array( strtoupper( $this->merge_log_level ), array_keys( SEZ_LOG_LEVELS ) ) ? $this->merge_log_level : "INFO",
@@ -57,6 +65,12 @@
                 if ( false === file_put_contents( $file, json_encode( $data ) ) ){
                     return new WP_Error( "easysync_save_error", "Unable to save settings. Ensure the uploads directory is writeable by Wordpress." );
                 }
+
+                // LIFE-56: Move license key out of sez_settings.json file.
+                $settings = get_option( $this->option_name );
+                $settings = empty( $settings ) || !is_array( $settings ) ? array() : $settings;
+                $settings[ "license" ] = $this->license;
+                update_option( $this->option_name, $settings );
                 return true;
 
             } catch ( Exception $e ){
