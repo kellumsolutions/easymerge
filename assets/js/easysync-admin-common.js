@@ -26,11 +26,15 @@ jQuery( document ).ready( function( $ ){
     window.easysync = {
         $nav_tab_wrapper: $( ".easysync-nav-tab-wrapper" ),
         $settings_form: $( "#easysync-nav-tab-settings-content form" ),
+        $license_content: $( "#easysync-nav-tab-license-content" ),
+        updating_license: false,
         init: function(){
             this.$nav_tab_wrapper.on( "click", ".nav-tab", this.on_nav_tab_click );
             this.$settings_form.on( "submit", this.on_save_settings );
             this.$settings_form.on( "change", "input, select", this.on_settings_change );
             $( "#easysync-nav-tab-advancedtools-content" ).on( "click", "button", this.on_run_advancedtool );
+            this.$license_content.on( "click", "#easymerge-toggle-update-license", this.toggle_update_license_field );
+            this.$license_content.on( "click", "#easymerge-update-license", this.on_update_license );
         },
         on_nav_tab_click: function( e ){
             e.preventDefault();
@@ -154,6 +158,50 @@ jQuery( document ).ready( function( $ ){
             .always( function(){
                 self.children( "span" ).addClass( "visually-hidden" );
                 response_el.removeClass( "visually-hidden" );
+            });
+        },
+        toggle_update_license_field: function(e){
+            var el = $( "#easymerge-toggle-update-license" );
+            if ( el.hasClass( "active" ) ){
+                el.removeClass( "active" );
+                el.html( "Update" );
+            } else {
+                el.addClass( "active" );
+                el.html( "Cancel" );
+            }
+        },
+        on_update_license: function(){
+            if ( easysync.updating_license ){ return; }
+
+            var indicator = $( "#easymerge-update-license-progress" );
+            indicator.html( "Processing..." );
+
+            jQuery.post(
+                ajaxurl,
+                { "action": "sez_update_license", "license": $( "#easymerge-license-key").val() },
+                function( response, status ){
+                    console.log( response, status );
+                    
+                    if ( status == "success" ){                        
+                        // WP error.
+                        if ( is_wp_error( response ) ){
+                            indicator.html( wp_error_message( response ) );
+                        } else {
+                            window.location.reload();
+                        }
+                    
+                    } else {
+                        indicator.html( "<span class='easysync-response-fail'>An unknown error occurred. Please try again later.</span>" );
+                    }
+                }
+            )
+            .fail( function( jqXHR, textStatus, errorThrown ){
+                console.log( jqXHR, textStatus, errorThrown );
+                console.log( "oops we got an error" );
+                indicator.html( "<span class='easysync-response-fail'>An unknown error occurred. Please try again later.</span>" );
+            })
+            .always( function(){
+                easysync.updating_license = false;
             });
         }
     };

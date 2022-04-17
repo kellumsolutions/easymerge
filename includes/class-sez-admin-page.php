@@ -14,6 +14,7 @@
             add_action( 'wp_ajax_sez_save_settings', array( __CLASS__, 'save_settings' ) );
             add_action( 'wp_ajax_sez_run_advancedtool', array( __CLASS__, 'run_advanced_tool' ) );
             add_action( 'wp_ajax_sez_get_trackers', array( __CLASS__, 'get_site_trackers' ) );
+            add_action( 'wp_ajax_sez_update_license', array( __CLASS__, 'update_license' ) );
         }
 
 
@@ -320,6 +321,21 @@
 		        $output .= "<div class='row'><div class='col-6'><h5><a href='//" . esc_html( $site->staging_domain ) . "' target='_blank'>" . esc_html( $site->staging_domain ). "</a></h5><p>Tracking since: " . esc_html( $since ) . "</p></div><div class='col-6 text-end'><p>Status: <strong>" . esc_html( ucfirst( $site->status ) ) . "</strong></p></div></div>";
 	        }
 	        return wp_send_json( $output );
+        }
+
+
+        public static function update_license(){
+            if ( !isset( $_POST[ "license" ] ) ){
+                return wp_send_json_error( new WP_Error( "update_license_error", "<span class='easysync-response-fail'>Missing license.</span>" ) );
+            }
+
+            $license = sanitize_key( $_POST[ "license" ] );
+            if ( empty( $license ) ){
+                return wp_send_json_error( new WP_Error( "update_license_error", "<span class='easysync-response-fail'>License is required.</span>" ) );
+            }
+            SEZ()->settings->license = $license;
+            SEZ()->settings->save();
+            return wp_send_json( true );
         }
     }
 

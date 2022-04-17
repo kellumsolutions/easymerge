@@ -3,7 +3,7 @@
  * Plugin Name: EasyMerge
  * Description: Easily merge database changes from a production environment to dev environments.
  * Author: Kellum Solutions
- * Version: 1.0.3
+ * Version: 1.0.4
  * Author URI: https://www.kellumsolutions.com/
  *
  * TODO: 
