@@ -173,3 +173,25 @@ button.easysync-dynamic.processing > span:nth-of-type(2){
 .easysync-response-fail {
 	font-weight: bold;
 }
+.easymerge-single-line-field {
+    position: relative;
+    max-width: 400px;
+}
+.easymerge-single-line-field input {
+    width: 100%;
+    padding-right: 85px;
+}
+.easymerge-single-line-field button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 75px;
+    border-radius: 0 .25rem .25rem 0;
+}
+#easymerge-toggle-update-license + div {
+    display: none;
+}
+#easymerge-toggle-update-license.active + div {
+    display: block;
+}

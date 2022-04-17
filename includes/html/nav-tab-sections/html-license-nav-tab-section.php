@@ -6,7 +6,17 @@
         <tbody>
             <tr>
                 <td>License Key:</td>
-                <td><?php echo esc_html( SEZ()->settings->license ); ?></td>
+                <td>
+                    <span><?php echo esc_html( SEZ()->settings->license ); ?></span>
+                    <span id="easymerge-toggle-update-license" style="margin-left:10px" class="easysync-hyperlink">Update</span>
+                    <div>
+                        <div style="margin: 10px 0" class="easymerge-single-line-field">
+                            <input id="easymerge-license-key" placeholder="New license key" type="text" />
+                            <button id="easymerge-update-license" type="button" class="btn btn-primary">Update</button>
+                        </div>
+                        <p id="easymerge-update-license-progress"></p>
+                    </div>
+                </td>
             </tr>
             <tr>
                 <td>License Type:</td>
